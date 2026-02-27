@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['pdf-parse-new'],
+  serverExternalPackages: ['pdf-parse'],
   webpack: (config, { isServer }) => {
     // Only modify client-side & edge environments
     config.resolve.fallback = {
@@ -15,9 +15,9 @@ const nextConfig: NextConfig = {
       path: false,
     };
     
-    // Explicitly add pdf-parse-new to webpack externals so Next.js doesn't try to parse it
+    // Explicitly add pdf-parse to webpack externals so Next.js doesn't try to parse it
     if (isServer) {
-      config.externals = [...(config.externals || []), 'pdf-parse-new'];
+      config.externals = [...(config.externals || []), 'pdf-parse'];
     }
 
     return config;
