@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import pdfParse from "pdf-parse";
 
 export async function POST(req: Request) {
     try {
@@ -21,6 +20,10 @@ export async function POST(req: Request) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
+        // Gunakan dynamic eval require untuk membutakan Next.js Turbopack 
+        // agar tidak mencoba men-compile file C++ atau binary di library pdf-parse
+        const pdfParse = eval('require')('pdf-parse');
+        
         const parsedPdf = await pdfParse(buffer);
         // Use the full raw text; don't rely on line splits
         const rawText = parsedPdf.text;
