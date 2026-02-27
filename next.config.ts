@@ -1,8 +1,27 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Prevent Webpack from bundling node-specific dynamic requires inside pdf-parse-new
-  serverExternalPackages: ['pdf-parse-new']
+  serverExternalPackages: ['pdf-parse-new'],
+  webpack: (config, { isServer }) => {
+    // Only modify client-side & edge environments
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      child_process: false,
+      readline: false,
+      crypto: false,
+      stream: false,
+      zlib: false,
+      path: false,
+    };
+    
+    // Explicitly add pdf-parse-new to webpack externals so Next.js doesn't try to parse it
+    if (isServer) {
+      config.externals = [...(config.externals || []), 'pdf-parse-new'];
+    }
+
+    return config;
+  },
 };
 
 export default nextConfig;
