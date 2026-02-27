@@ -1,0 +1,38 @@
+<mxGraphModel pageWidth="860" pageHeight="680">
+<root>
+<mxCell id="0"/><mxCell id="1" parent="0"/>
+<mxCell id="t" value="SD-01: Login ke Sistem" style="text;html=1;fontSize=15;fontStyle=1;align=center;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="50" y="6" width="760" height="28" as="geometry"/></mxCell>
+
+<!-- Participants -->
+<mxCell id="p1" value="Pengguna" style="rounded=1;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="10" y="42" width="140" height="40" as="geometry"/></mxCell>
+<mxCell id="p2" value="Next.js (Login Page)" style="rounded=1;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="200" y="42" width="150" height="40" as="geometry"/></mxCell>
+<mxCell id="p3" value="NextAuth API" style="rounded=1;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="400" y="42" width="150" height="40" as="geometry"/></mxCell>
+<mxCell id="p4" value="Database (Prisma)" style="rounded=1;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="600" y="42" width="150" height="40" as="geometry"/></mxCell>
+
+<!-- Lifelines cx: 80, 275, 475, 675 -->
+<mxCell id="l1" value="" style="dashed=1;endArrow=none;strokeColor=#aaa;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="80" y="82" as="sourcePoint"/><mxPoint x="80" y="640" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="l2" value="" style="dashed=1;endArrow=none;strokeColor=#aaa;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="275" y="82" as="sourcePoint"/><mxPoint x="275" y="640" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="l3" value="" style="dashed=1;endArrow=none;strokeColor=#aaa;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="475" y="82" as="sourcePoint"/><mxPoint x="475" y="640" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="l4" value="" style="dashed=1;endArrow=none;strokeColor=#aaa;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="675" y="82" as="sourcePoint"/><mxPoint x="675" y="640" as="targetPoint"/></mxGeometry></mxCell>
+
+<!-- Messages -->
+<mxCell id="m1" value="1: Akses halaman /login" style="endArrow=block;endFill=1;strokeColor=#333;fontSize=10;verticalAlign=bottom;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="80" y="120" as="sourcePoint"/><mxPoint x="275" y="120" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m2" value="2: Tampilkan form login" style="endArrow=open;endFill=0;dashed=1;strokeColor=#666;fontSize=10;verticalAlign=bottom;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="275" y="160" as="sourcePoint"/><mxPoint x="80" y="160" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m3" value="3: Input NIK + Password → klik Login" style="endArrow=block;endFill=1;strokeColor=#333;fontSize=10;verticalAlign=bottom;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="80" y="210" as="sourcePoint"/><mxPoint x="275" y="210" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m4" value="4: POST /api/auth/signin {nik, password}" style="endArrow=block;endFill=1;strokeColor=#333;fontSize=10;verticalAlign=bottom;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="275" y="255" as="sourcePoint"/><mxPoint x="475" y="255" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m5" value="5: prisma.user.findUnique({where:{nik}})" style="endArrow=block;endFill=1;strokeColor=#333;fontSize=10;verticalAlign=bottom;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="475" y="300" as="sourcePoint"/><mxPoint x="675" y="300" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m6" value="6: return userData | null" style="endArrow=open;endFill=0;dashed=1;strokeColor=#666;fontSize=10;verticalAlign=bottom;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="675" y="340" as="sourcePoint"/><mxPoint x="475" y="340" as="targetPoint"/></mxGeometry></mxCell>
+
+<!-- ALT frame -->
+<mxCell id="af" value="alt [Password valid]" style="rounded=0;fillColor=none;strokeColor=#555;dashed=1;fontSize=10;fontStyle=1;verticalAlign=top;spacingTop=4;" vertex="1" parent="1"><mxGeometry x="160" y="360" width="560" height="195" as="geometry"/></mxCell>
+<mxCell id="m7" value="7: bcrypt.compare(password, hash)" style="endArrow=block;endFill=1;strokeColor=#333;fontSize=10;verticalAlign=bottom;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="475" y="395" as="sourcePoint"/><mxPoint x="475" y="425" as="targetPoint"><Array as="points"><mxPoint x="530" y="395"/><mxPoint x="530" y="425"/></Array></mxGeometry></mxCell>
+<mxCell id="m8" value="8: return session token + JWT" style="endArrow=open;endFill=0;dashed=1;strokeColor=#666;fontSize=10;verticalAlign=bottom;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="475" y="460" as="sourcePoint"/><mxPoint x="275" y="460" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m9" value="9: redirect /dashboard (200 OK)" style="endArrow=block;endFill=1;strokeColor=#333;fontSize=10;verticalAlign=bottom;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="275" y="500" as="sourcePoint"/><mxPoint x="80" y="500" as="targetPoint"/></mxGeometry></mxCell>
+
+<!-- separator alt -->
+<mxCell id="sep" value="" style="endArrow=none;strokeColor=#555;dashed=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="160" y="520" as="sourcePoint"/><mxPoint x="720" y="520" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="afl" value="[Password salah]" style="text;fontSize=9;fontStyle=2;align=left;" vertex="1" parent="1"><mxGeometry x="164" y="522" width="140" height="14" as="geometry"/></mxCell>
+<mxCell id="m10" value="10: Error 401 — NIK / Password salah" style="endArrow=open;endFill=0;dashed=1;strokeColor=#c00;fontColor=#c00;fontSize=10;verticalAlign=bottom;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="475" y="545" as="sourcePoint"/><mxPoint x="80" y="545" as="targetPoint"/></mxGeometry></mxCell>
+
+</root>
+</mxGraphModel>

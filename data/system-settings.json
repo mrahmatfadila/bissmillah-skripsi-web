@@ -1,0 +1,60 @@
+{
+  "general": {
+    "appName": "IT Ticketing Support",
+    "appLogo": "/logo/login-logo.png",
+    "companyName": "PT Plaza Bali",
+    "supportEmail": "support@plazabali.com",
+    "supportPhone": "082112435490",
+    "timezone": "Asia/Jakarta",
+    "language": "id",
+    "dateFormat": "DD/MM/YYYY"
+  },
+  "ticket": {
+    "autoAssignEnabled": false,
+    "autoCloseEnabled": true,
+    "autoCloseDays": 7,
+    "maxAttachmentSize": 10,
+    "allowedFileTypes": "jpg,jpeg,png,gif,pdf,doc,docx,xlsx",
+    "requireCategory": true,
+    "requirePriority": true,
+    "defaultPriority": "MEDIUM",
+    "ticketPrefix": "TKT"
+  },
+  "notification": {
+    "emailEnabled": true,
+    "whatsappEnabled": true,
+    "whatsappApiKey": "",
+    "whatsappAdminPhone": "082112435490,081292765764,081388954369",
+    "notifyOnCreate": true,
+    "notifyOnAssign": true,
+    "notifyOnStatusChange": true,
+    "notifyOnComment": true,
+    "notifyOnClose": true
+  },
+  "security": {
+    "sessionTimeout": 480,
+    "maxLoginAttempts": 3,
+    "lockoutDuration": 15,
+    "requireStrongPassword": false,
+    "passwordMinLength": 6,
+    "twoFactorEnabled": false,
+    "ipWhitelistEnabled": false,
+    "ipWhitelist": ""
+  },
+  "sla": {
+    "enabled": true,
+    "criticalHours": 2,
+    "highHours": 8,
+    "mediumHours": 24,
+    "lowHours": 72,
+    "warningThreshold": 75
+  },
+  "maintenance": {
+    "maintenanceMode": false,
+    "maintenanceMessage": "Sistem sedang dalam perbaikan. Mohon coba beberapa saat lagi.",
+    "allowAdminAccess": true,
+    "scheduledMaintenance": ""
+  },
+  "updatedAt": "2026-02-26T16:24:24.525Z",
+  "updatedBy": "Administrator"
+}

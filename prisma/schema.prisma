@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String          @id @default(cuid())
+  nik             String?         @unique
+  name            String?
+  email           String?         @unique
+  password        String
+  role            Role            @default(STAFF)
+  department      String?
+  location        String?         @default("Kantor Jakarta")
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  image           String?
+  comments        Comment[]
+  articles        KnowledgeBase[]
+  notifications   Notification[]
+  ticketsAssigned Ticket[]        @relation("TicketAssignee")
+  ticketsCreated  Ticket[]        @relation("TicketCreator")
+  failedLoginAttempts Int         @default(0)
+  lockedUntil         DateTime?
+}
+
+model Ticket {
+  id            String         @id @default(cuid())
+  ticketNumber  String         @unique
+  title         String
+  description   String
+  status        TicketStatus   @default(OPEN)
+  priority      TicketPriority @default(MEDIUM)
+  category      String?
+  ahpScore      Float?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  creatorId     String
+  assigneeId    String?
+  kbArticleId   String?
+  attachments   String[]       @default([])
+  comments      Comment[]
+  notifications Notification[]
+  assignee      User?          @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  creator       User           @relation("TicketCreator", fields: [creatorId], references: [id])
+  kbArticle     KnowledgeBase? @relation(fields: [kbArticleId], references: [id])
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  content     String
+  createdAt   DateTime @default(now())
+  ticketId    String
+  authorId    String
+  attachments String[] @default([])
+  author      User     @relation(fields: [authorId], references: [id])
+  ticket      Ticket   @relation(fields: [ticketId], references: [id])
+}
+
+model KnowledgeBase {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  category  String
+  tags      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  tickets   Ticket[]
+}
+
+model AHPCriteria {
+  id        String   @id @default(cuid())
+  name      String
+  weight    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RolePermission {
+  id          String   @id @default(cuid())
+  role        Role     @unique
+  permissions String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO")
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+  ticketId  String?
+  ticket    Ticket?  @relation(fields: [ticketId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  SUPER_ADMIN
+  IT_SUPPORT
+  MANAGER
+  SUPERVISOR
+  FINANCE
+  STAFF
+  SECURITY
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  PENDING
+  RESOLVED
+  CLOSED
+  CANCELLED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model ShiftSchedule {
+  id        String   @id @default(cuid())
+  date      DateTime
+  shift     String   // "PAGI", "SIANG", "MALAM"
+  agentName String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, shift])
+}
+
+model ShiftSwapRequest {
+  id              String   @id @default(cuid())
+  requesterName   String   // Person who wants to swap
+  requesterShift  String   // Their original shift (PAGI/SIANG/MALAM)
+  requesterDate   DateTime // Date of their original shift
+  targetName      String   // Person they want to swap with
+  targetShift     String   // Target's original shift
+  targetDate      DateTime // Date of target's shift
+  reason          String?
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  approvedBy      String?
+  approvedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
