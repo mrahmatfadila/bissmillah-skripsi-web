@@ -43,6 +43,7 @@ const PERMISSIONS: Permission[] = [
     { id: "status_filters", label: "Filter Status", description: "Melihat daftar tiket yang dikategorikan status" },
     { id: "departments", label: "Filter Departemen", description: "Klasifikasi tiket berdasarkan departemen creator" },
     { id: "knowledge_base", label: "Knowledge Base", description: "Melihat artikel database panduan permasalahan" },
+    { id: "shift_schedule", label: "Jadwal Kerja", description: "Melihat Kalender Shift & mengajukan Tukar Shift" },
     { id: "cctv_issues", label: "Masalah CCTV", description: "Melihat daftar rekaman kerusakan spesifik CCTV" },
     { id: "edc_issues", label: "Masalah EDC", description: "Daftar pemeliharaan spesifik EDC" },
     { id: "reports", label: "Laporan Analitik", description: "Melihat laporan kinerja komprehensif" },
@@ -50,9 +51,9 @@ const PERMISSIONS: Permission[] = [
     { id: "ahp_config", label: "Konfigurasi AHP", description: "Manajemen prioritas otomatis SPK AHP" },
     { id: "user_management", label: "Manajemen User", description: "Akses menambah, merubah, & menghapus profil user" },
     { id: "role_management", label: "Peran & Akses", description: "Ubah halaman matriks izin fitur ini" },
-    { id: "system_settings", label: "Pengaturan Sistem", description: "Akses edit SLA, Security, Jadwal, & Notifikasi" },
+    { id: "system_settings", label: "Pengaturan Sistem (Admin)", description: "Akses Upload Jadwal PDF, edit SLA, Security, & Notifikasi" },
     { id: "dev_tools", label: "Developer Tools", description: "Melihat system API, log error dan Semua Tiket" },
-    { id: "profile_settings", label: "Pengaturan Profil", description: "Akses mengubah profil dan preferensi pribadi" },
+    { id: "profile_settings", label: "Pengaturan Profil & Preferensi", description: "Akses mengubah profil dan preferensi pribadi" },
 ];
 
 const ROLE_LABELS: Record<string, { label: string; color: string }> = {

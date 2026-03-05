@@ -208,8 +208,8 @@ export function Sidebar() {
                     </div>
                 )}
 
-                {/* Jadwal Shift - Visible to IT Support & Admins */}
-                {(role === 'IT_SUPPORT' || role === 'SUPER_ADMIN' || role === 'MANAGER' || role === 'SUPERVISOR') && (
+                {/* Jadwal Shift */}
+                {hasPermission("shift_schedule") && (
                     <div>
                         <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Jadwal Kerja</h3>
                         <div className="space-y-1">
@@ -264,8 +264,6 @@ export function Sidebar() {
                                 <>
                                     <NavLink href="/dashboard/settings/system" icon={Settings} label="Pengaturan Sistem" />
                                     <NavLink href="/dashboard/settings/schedule" icon={Clock} label="Upload Jadwal PDF" />
-                                    <NavLink href="/dashboard/settings/schedule/view" icon={CalendarDays} label="Kalender Shift" />
-                                    <NavLink href="/dashboard/settings/schedule/swap" icon={ArrowLeftRight} label="Tukar Shift" />
                                 </>
                             )}
                         </div>
