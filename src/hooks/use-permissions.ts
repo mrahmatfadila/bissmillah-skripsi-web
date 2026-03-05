@@ -18,13 +18,22 @@ export function usePermissions() {
 
     const [loading, setLoading] = useState<boolean>(() => {
         if (!role) return true;
+        // SUPER_ADMIN selalu dapat semua, tidak perlu fetch
+        if (role === 'SUPER_ADMIN') return false;
         return !globalPermissionsCache[role];
     });
 
     useEffect(() => {
+        // SUPER_ADMIN tidak perlu fetch apapun
+        if (role === 'SUPER_ADMIN') {
+            setLoading(false);
+            return;
+        }
+
         async function fetchPermissions() {
             if (!role) {
                 setPermissions([]);
+                setLoading(false);
                 return;
             }
 
@@ -35,6 +44,10 @@ export function usePermissions() {
                     const fetchedPerms = data.permissions || [];
                     setPermissions(fetchedPerms);
                     globalPermissionsCache[role] = fetchedPerms;
+                } else {
+                    // DB belum ada data untuk role ini, set kosong saja
+                    setPermissions([]);
+                    globalPermissionsCache[role] = [];
                 }
             } catch (error) {
                 console.error('Error fetching permissions:', error);
