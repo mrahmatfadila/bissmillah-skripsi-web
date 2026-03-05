@@ -40,13 +40,13 @@ function getActiveShifts(now: Date): { shift: string; date: Date }[] {
 
 export async function GET(request: Request) {
     try {
-        // Vercel servers run on UTC. Convert to Indonesia WITA timezone (UTC+8) for Plaza Bali (Bali).
+        // Vercel servers run on UTC. Convert to Indonesia WIB timezone (UTC+7) for Jakarta.
         const nowUTC = new Date();
-        const WITA_OFFSET_MS = 8 * 60 * 60 * 1000; // UTC+8
-        // Create a "fake" date whose UTC fields represent local WITA time
-        const nowWITA = new Date(nowUTC.getTime() + WITA_OFFSET_MS);
+        const WIB_OFFSET_MS = 7 * 60 * 60 * 1000; // UTC+7 (WIB - Jakarta)
+        // Create a "fake" date whose UTC fields represent local WIB time
+        const nowWIB = new Date(nowUTC.getTime() + WIB_OFFSET_MS);
 
-        const activeShifts = getActiveShifts(nowWITA);
+        const activeShifts = getActiveShifts(nowWIB);
 
         if (activeShifts.length === 0) {
             return NextResponse.json({ agentName: null, message: "Tidak ada shift aktif saat ini" });
