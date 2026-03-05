@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['pdf-parse'],
-  // Allow Turbopack to run without complaint
+  serverExternalPackages: ['pdf-parse', 'pdf-parse-new'],
   turbopack: {},
 };
 

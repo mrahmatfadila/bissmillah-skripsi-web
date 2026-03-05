@@ -5,7 +5,6 @@ import { prisma } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 
-
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -23,12 +22,9 @@ export async function POST(req: Request) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Gunakan dynamic eval require untuk membutakan Next.js Turbopack 
-        // agar tidak mencoba men-compile file C++ atau binary di library pdf-parse
-        const pdfParse = eval('require')('pdf-parse');
-        
+        // Use pdf-parse-new which is compatible with Vercel serverless/edge
+        const pdfParse = (await import('pdf-parse-new')).default;
         const parsedPdf = await pdfParse(buffer);
-        // Use the full raw text; don't rely on line splits
         const rawText = parsedPdf.text;
 
         // Detect month and year
@@ -47,14 +43,7 @@ export async function POST(req: Request) {
             targetYear = parseInt(headerMatch[2], 10);
         }
 
-        // Strategy: Find each employee row by matching NIK pattern (number with 8-12 digits)
-        // The surrounding text after the NIK contains: Name + shift codes (P/S/M/L per day)
-        // E.g from preview: "8117110002 | Zaenal Anwar S M L L S M L P ..."
-        //   OR it may be: "8117110002Zaenal AnwarSMLL..." (without spaces after pipe is removed)
-        // We match NIK (10-digit number) then everything after until next NIK or end
-
-        // Extract all rows: Split on NIK boundaries (10-digit number)
-        // The NIK is typically 10 digits in Indonesian companies
+        // Extract employee rows by matching NIK pattern (10-12 digit numbers)
         const nikPattern = /\b(\d{10,12})\b/g;
         const nikMatches: RegExpExecArray[] = [];
         let match;
@@ -63,7 +52,7 @@ export async function POST(req: Request) {
         }
 
         if (nikMatches.length === 0) {
-            // Fallback: try 6-digit employee numbers
+            // Fallback: try 6-9 digit employee numbers
             const shortNikPattern = /\b(\d{6,9})\b/g;
             while ((match = shortNikPattern.exec(rawText)) !== null) {
                 nikMatches.push(match);
@@ -77,11 +66,9 @@ export async function POST(req: Request) {
             const startIdx = nikMatch.index + nikMatch[0].length;
             const endIdx = i + 1 < nikMatches.length ? nikMatches[i + 1].index : rawText.length;
             const segment = rawText.substring(startIdx, endIdx).replace(/\|/g, ' ').trim();
-            // segment now looks like: "Zaenal Anwar S M L L S M L P S M L P S M L P..."
 
             const tokens = segment.split(/\s+/).filter(Boolean);
 
-            // Separate name from shifts
             const nameTokens: string[] = [];
             const shiftTokens: string[] = [];
 
@@ -89,10 +76,8 @@ export async function POST(req: Request) {
                 if (/^[PSML]$/.test(token.toUpperCase()) && shiftTokens.length < 31) {
                     shiftTokens.push(token.toUpperCase());
                 } else if (shiftTokens.length === 0 && !/^\d+$/.test(token)) {
-                    // Token is part of the name (not a number, not a shift char)
                     nameTokens.push(token);
                 } else if (shiftTokens.length > 0 && /^\d+$/.test(token)) {
-                    // We've entered the summary totals section, stop
                     break;
                 }
             }
@@ -100,7 +85,6 @@ export async function POST(req: Request) {
             const agentName = nameTokens.join(" ").replace(/\|/g, '').trim();
             if (!agentName || shiftTokens.length === 0) continue;
 
-            // Map each shift token to a date
             for (let day = 0; day < shiftTokens.length; day++) {
                 const code = shiftTokens[day];
                 let shiftName = "";
@@ -126,7 +110,7 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
-        // Upsert each schedule entry using raw SQL (avoids Prisma generate dependency)
+        // Upsert each schedule entry
         for (const s of schedules) {
             const now = new Date();
             await prisma.$executeRaw`
@@ -145,7 +129,7 @@ export async function POST(req: Request) {
         }
 
         return NextResponse.json({
-            message: `Jadwal ${monthMap && Object.keys(monthMap).find(k => monthMap[k] === targetMonth) || ''} ${targetYear} berhasil diimpor! Total entri: ${schedules.length}`,
+            message: `Jadwal ${Object.keys(monthMap).find(k => monthMap[k] === targetMonth) || ''} ${targetYear} berhasil diimpor! Total entri: ${schedules.length}`,
             importedRows: schedules.length,
         });
 
