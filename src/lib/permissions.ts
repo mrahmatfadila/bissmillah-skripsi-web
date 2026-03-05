@@ -24,6 +24,7 @@ export async function getRolePermissions(role: string): Promise<string[]> {
  * Check if a role has a specific permission
  */
 export async function hasPermission(role: string, permission: string): Promise<boolean> {
+    if (role === 'SUPER_ADMIN') return true;
     const permissions = await getRolePermissions(role);
     return permissions.includes(permission);
 }
@@ -32,6 +33,7 @@ export async function hasPermission(role: string, permission: string): Promise<b
  * Check if a role has any of the specified permissions
  */
 export async function hasAnyPermission(role: string, permissionList: string[]): Promise<boolean> {
+    if (role === 'SUPER_ADMIN') return true;
     const permissions = await getRolePermissions(role);
     return permissionList.some(p => permissions.includes(p));
 }
@@ -40,6 +42,7 @@ export async function hasAnyPermission(role: string, permissionList: string[]): 
  * Check if a role has all of the specified permissions
  */
 export async function hasAllPermissions(role: string, permissionList: string[]): Promise<boolean> {
+    if (role === 'SUPER_ADMIN') return true;
     const permissions = await getRolePermissions(role);
     return permissionList.every(p => permissions.includes(p));
 }

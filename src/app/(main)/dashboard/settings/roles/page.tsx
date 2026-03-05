@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { Shield, Check, X, Save, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { usePermissions } from "@/hooks/use-permissions";
 
 interface Permission {
     id: string;
@@ -33,25 +34,25 @@ interface RolePermissionData {
 }
 
 const PERMISSIONS: Permission[] = [
-    { id: "dashboard", label: "Dashboard", description: "View analytics dashboard" },
-    { id: "activity_log", label: "Activity Log", description: "View system activity logs" },
-    { id: "customers", label: "Customers", description: "View customer list" },
-    { id: "unassigned_tickets", label: "Unassigned Tickets", description: "View and assign unassigned tickets" },
-    { id: "my_tickets", label: "My Tickets", description: "View and manage own tickets" },
-    { id: "assigned_tickets", label: "Assigned Tickets", description: "View all assigned tickets" },
-    { id: "spam_tickets", label: "Spam Tickets", description: "Manage spam tickets" },
-    { id: "status_filters", label: "Status Filters", description: "Filter tickets by status" },
-    { id: "departments", label: "Departments", description: "View tickets by department" },
-    { id: "knowledge_base", label: "Knowledge Base", description: "Access knowledge base" },
-    { id: "reports", label: "Reports & Analytics", description: "View reports and analytics" },
-    { id: "data_quality", label: "Data Quality", description: "Manage data quality" },
-    { id: "cctv_issues", label: "CCTV Issues", description: "Manage CCTV-related issues" },
-    { id: "edc_issues", label: "EDC Issues", description: "Manage EDC-related issues" },
-    { id: "ahp_config", label: "AHP Configuration", description: "Configure AHP settings" },
-    { id: "user_management", label: "User Management", description: "Manage users" },
-    { id: "role_management", label: "Role Management", description: "Manage role permissions" },
-    { id: "system_settings", label: "System Settings", description: "Configure system settings" },
-    { id: "dev_tools", label: "Developer Tools", description: "Access developer tools" },
+    { id: "dashboard", label: "Dashboard", description: "Melihat ringkasan dasbor log masuk" },
+    { id: "activity_log", label: "Log Aktivitas", description: "Melihat log log sejarah aktivitas sistem" },
+    { id: "my_tickets", label: "Manajemen Tiket (Root)", description: "Perlu untuk membuka menu utama Tiket Saya" },
+    { id: "unassigned_tickets", label: "Tiket Belum Ditugaskan", description: "Melihat dan mengklaim tiket baru" },
+    { id: "assigned_tickets", label: "Tugas Saya", description: "Melihat semua tiket yang ditugaskan ke Anda" },
+    { id: "spam_tickets", label: "Tiket Spam", description: "Kemampuan memantau kotak spam" },
+    { id: "status_filters", label: "Filter Status", description: "Melihat daftar tiket yang dikategorikan status" },
+    { id: "departments", label: "Filter Departemen", description: "Klasifikasi tiket berdasarkan departemen creator" },
+    { id: "knowledge_base", label: "Knowledge Base", description: "Melihat artikel database panduan permasalahan" },
+    { id: "cctv_issues", label: "Masalah CCTV", description: "Melihat daftar rekaman kerusakan spesifik CCTV" },
+    { id: "edc_issues", label: "Masalah EDC", description: "Daftar pemeliharaan spesifik EDC" },
+    { id: "reports", label: "Laporan Analitik", description: "Melihat laporan kinerja komprehensif" },
+    { id: "data_quality", label: "Kualitas Data", description: "Tinjau skor anomali & kelengkapan deskripsi" },
+    { id: "ahp_config", label: "Konfigurasi AHP", description: "Manajemen prioritas otomatis SPK AHP" },
+    { id: "user_management", label: "Manajemen User", description: "Akses menambah, merubah, & menghapus profil user" },
+    { id: "role_management", label: "Peran & Akses", description: "Ubah halaman matriks izin fitur ini" },
+    { id: "system_settings", label: "Pengaturan Sistem", description: "Akses edit SLA, Security, Jadwal, & Notifikasi" },
+    { id: "dev_tools", label: "Developer Tools", description: "Melihat system API, log error dan Semua Tiket" },
+    { id: "profile_settings", label: "Pengaturan Profil", description: "Akses mengubah profil dan preferensi pribadi" },
 ];
 
 const ROLE_LABELS: Record<string, { label: string; color: string }> = {
@@ -72,11 +73,13 @@ export default function RolePermissionsPage() {
     const [saving, setSaving] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
 
+    const { hasPermission: currentUserHasPermission, loading: permsLoading } = usePermissions();
+
     useEffect(() => {
-        if (session && session.user.role !== 'SUPER_ADMIN') {
+        if (!permsLoading && !currentUserHasPermission('role_management')) {
             router.push('/dashboard');
         }
-    }, [session, router]);
+    }, [permsLoading, currentUserHasPermission, router]);
 
     useEffect(() => {
         fetchPermissions();
@@ -87,8 +90,21 @@ export default function RolePermissionsPage() {
             setLoading(true);
             const response = await fetch('/api/permissions');
             if (response.ok) {
-                const data = await response.json();
-                setRolePermissions(data);
+                const data: RolePermissionData[] = await response.json();
+
+                // Ensure all roles from ROLE_LABELS exist in the state
+                const allRoles = Object.keys(ROLE_LABELS).map(roleKey => {
+                    const existing = data.find(d => d.role === roleKey);
+                    return existing || {
+                        id: `temp-${roleKey}`,
+                        role: roleKey,
+                        permissions: [],
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                    };
+                });
+
+                setRolePermissions(allRoles);
             }
         } catch (error) {
             console.error('Error fetching permissions:', error);
@@ -149,7 +165,7 @@ export default function RolePermissionsPage() {
         return roleData?.permissions.includes(permissionId) || false;
     };
 
-    if (!session || session.user.role !== 'SUPER_ADMIN') {
+    if (!session || (!permsLoading && !currentUserHasPermission('role_management'))) {
         return null;
     }
 
@@ -235,8 +251,9 @@ export default function RolePermissionsPage() {
                                                     <TableCell key={rp.role} className="text-center">
                                                         <div className="flex justify-center">
                                                             <Checkbox
-                                                                checked={hasPermission(rp.role, permission.id)}
+                                                                checked={rp.role === 'SUPER_ADMIN' || hasPermission(rp.role, permission.id)}
                                                                 onCheckedChange={() => togglePermission(rp.role, permission.id)}
+                                                                disabled={rp.role === 'SUPER_ADMIN'}
                                                                 className="w-5 h-5"
                                                             />
                                                         </div>

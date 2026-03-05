@@ -11,7 +11,10 @@ export async function GET(request: Request) {
         const session = await getServerSession(authOptions);
 
         // Only Super Admin can access
-        if (!session || session.user.role !== 'SUPER_ADMIN') {
+        const { hasPermission } = await import('@/lib/permissions');
+        const canManageRoles = session ? await hasPermission(session.user.role, 'role_management') : false;
+
+        if (!session || !canManageRoles) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
