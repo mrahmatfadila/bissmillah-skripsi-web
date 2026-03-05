@@ -38,21 +38,39 @@ function getActiveShifts(now: Date): { shift: string; date: Date }[] {
     return results;
 }
 
+const SHIFT_LABEL: Record<string, string> = {
+    PAGI: "Pagi (06:00–15:00)",
+    SIANG: "Siang (13:30–22:30)",
+    MALAM: "Malam (21:30–06:30)",
+};
+
 export async function GET(request: Request) {
     try {
         // Vercel servers run on UTC. Convert to Indonesia WIB timezone (UTC+7) for Jakarta.
         const nowUTC = new Date();
-        const WIB_OFFSET_MS = 7 * 60 * 60 * 1000; // UTC+7 (WIB - Jakarta)
-        // Create a "fake" date whose UTC fields represent local WIB time
+        const WIB_OFFSET_MS = 7 * 60 * 60 * 1000; // UTC+7
         const nowWIB = new Date(nowUTC.getTime() + WIB_OFFSET_MS);
 
         const activeShifts = getActiveShifts(nowWIB);
 
+        // No shift window active right now (e.g. before 06:00 or brief overlap gaps)
         if (activeShifts.length === 0) {
-            return NextResponse.json({ agentName: null, message: "Tidak ada shift aktif saat ini" });
+            return NextResponse.json({
+                agentName: null,
+                activeShiftName: null,
+                noScheduleUploaded: false,
+                message: "Di luar jam shift",
+            });
         }
 
-        // Try from most specific (last in array) to first
+        // The "primary" shift = most specific (last added)
+        const primaryShift = activeShifts[activeShifts.length - 1].shift;
+
+        // Check if ANY schedule exists in DB at all
+        const totalScheduleCount = await prisma.shiftSchedule.count();
+        const noScheduleUploaded = totalScheduleCount === 0;
+
+        // Try from most specific to least specific
         for (let i = activeShifts.length - 1; i >= 0; i--) {
             const { shift, date } = activeShifts[i];
             const endOfDay = new Date(date.getTime() + 86400000);
@@ -65,18 +83,23 @@ export async function GET(request: Request) {
             `;
 
             if (rows && rows.length > 0) {
-                const schedule = rows[0];
                 return NextResponse.json({
-                    ...schedule,
-                    shiftLabel:
-                        shift === "PAGI" ? "Pagi (06:00–15:00)" :
-                            shift === "SIANG" ? "Siang (13:30–22:30)" :
-                                "Malam (21:30–06:30)",
+                    ...rows[0],
+                    shiftLabel: SHIFT_LABEL[shift] ?? shift,
+                    activeShiftName: shift,
+                    noScheduleUploaded: false,
                 });
             }
         }
 
-        return NextResponse.json({ agentName: null, message: "Jadwal hari ini belum diisi" });
+        // Shift window is active but no agent found
+        return NextResponse.json({
+            agentName: null,
+            activeShiftName: primaryShift,
+            shiftLabel: SHIFT_LABEL[primaryShift] ?? primaryShift,
+            noScheduleUploaded,
+            message: noScheduleUploaded ? "Jadwal belum diunggah" : "Tidak ada petugas terjadwal",
+        });
 
     } catch (error: any) {
         console.error("Live schedule error:", error);
