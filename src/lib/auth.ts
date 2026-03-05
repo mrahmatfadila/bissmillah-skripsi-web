@@ -1,7 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/db";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import { getSystemSettings } from "@/lib/settings";
 
 export const authOptions: NextAuthOptions = {
@@ -105,15 +105,7 @@ export const authOptions: NextAuthOptions = {
     },
     session: {
         strategy: "jwt",
-        maxAge: ((() => {
-            try {
-                // Ensure dynamic read during runtime (avoid static execution context if possible, but Next.js will execute this)
-                const settings = require("@/lib/settings").getSystemSettings();
-                return (settings?.security?.sessionTimeout || 480) * 60; // minutes to seconds
-            } catch {
-                return 480 * 60;
-            }
-        })()),
+        maxAge: 480 * 60, // 8 hours (static standard to avoid SSG crash reading local JSONs on Vercel edge)
     },
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET || "fallback_secret",
 };

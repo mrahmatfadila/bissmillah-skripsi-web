@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Role } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db';
 
 export async function GET() {
