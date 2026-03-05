@@ -602,13 +602,85 @@ export default function SystemSettingsPage() {
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label htmlFor="whatsappAdminPhone">Nomor Admin WA</Label>
-                                                    <Input
-                                                        id="whatsappAdminPhone"
-                                                        value={settings.notification.whatsappAdminPhone}
-                                                        onChange={(e) => updateSettings("notification", "whatsappAdminPhone", e.target.value)}
-                                                        placeholder="08xxxxxxxx,08xxxxxxxx"
-                                                    />
-                                                    <p className="text-xs text-muted-foreground">Pisahkan dengan koma untuk multiple nomor</p>
+                                                    {/* Tag-based phone number manager */}
+                                                    <div className="border border-input rounded-md p-3 bg-background space-y-3">
+                                                        {/* Existing phone tags */}
+                                                        <div className="flex flex-wrap gap-2 min-h-[32px]">
+                                                            {settings.notification.whatsappAdminPhone
+                                                                ? settings.notification.whatsappAdminPhone
+                                                                    .split(',')
+                                                                    .map((p: string) => p.trim())
+                                                                    .filter(Boolean)
+                                                                    .map((phone: string, idx: number) => (
+                                                                        <span
+                                                                            key={idx}
+                                                                            className="inline-flex items-center gap-1.5 bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700 rounded-full px-3 py-1 text-sm font-medium"
+                                                                        >
+                                                                            📱 {phone}
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    const phones = settings.notification.whatsappAdminPhone
+                                                                                        .split(',').map((p: string) => p.trim()).filter(Boolean);
+                                                                                    phones.splice(idx, 1);
+                                                                                    updateSettings("notification", "whatsappAdminPhone", phones.join(','));
+                                                                                }}
+                                                                                className="text-green-600 dark:text-green-400 hover:text-red-600 dark:hover:text-red-400 transition-colors ml-0.5 leading-none text-base"
+                                                                                title="Hapus nomor ini"
+                                                                            >
+                                                                                ×
+                                                                            </button>
+                                                                        </span>
+                                                                    ))
+                                                                : <span className="text-sm text-muted-foreground italic">Belum ada nomor admin</span>
+                                                            }
+                                                        </div>
+
+                                                        {/* Add new number input */}
+                                                        <div className="flex gap-2">
+                                                            <Input
+                                                                id="newPhoneInput"
+                                                                placeholder="Tambah nomor, contoh: 08123456789"
+                                                                className="flex-1 h-8 text-sm"
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        e.preventDefault();
+                                                                        const input = e.currentTarget;
+                                                                        const newPhone = input.value.trim().replace(/\s+/g, '');
+                                                                        if (!newPhone) return;
+                                                                        const existing = settings.notification.whatsappAdminPhone
+                                                                            ? settings.notification.whatsappAdminPhone.split(',').map((p: string) => p.trim()).filter(Boolean)
+                                                                            : [];
+                                                                        if (!existing.includes(newPhone)) {
+                                                                            updateSettings("notification", "whatsappAdminPhone", [...existing, newPhone].join(','));
+                                                                        }
+                                                                        input.value = '';
+                                                                    }
+                                                                }}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className="px-3 py-1 text-sm bg-green-600 hover:bg-green-700 text-white rounded-md font-medium transition-colors"
+                                                                onClick={() => {
+                                                                    const input = document.getElementById('newPhoneInput') as HTMLInputElement;
+                                                                    const newPhone = input?.value.trim().replace(/\s+/g, '');
+                                                                    if (!newPhone) return;
+                                                                    const existing = settings.notification.whatsappAdminPhone
+                                                                        ? settings.notification.whatsappAdminPhone.split(',').map((p: string) => p.trim()).filter(Boolean)
+                                                                        : [];
+                                                                    if (!existing.includes(newPhone)) {
+                                                                        updateSettings("notification", "whatsappAdminPhone", [...existing, newPhone].join(','));
+                                                                    }
+                                                                    if (input) input.value = '';
+                                                                }}
+                                                            >
+                                                                + Tambah
+                                                            </button>
+                                                        </div>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Ketik nomor lalu tekan <kbd className="bg-muted px-1 rounded text-[10px]">Enter</kbd> atau klik <strong>+ Tambah</strong>. Klik <strong>×</strong> untuk hapus.
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
