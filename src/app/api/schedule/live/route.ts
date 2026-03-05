@@ -3,21 +3,17 @@ import { prisma } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 
-
-
-
 /**
  * P (Pagi)  = 06:00 - 15:00
  * S (Siang) = 13:30 - 22:30
  * M (Malam) = 21:30 - 06:30 next day
  */
 function getActiveShifts(now: Date): { shift: string; date: Date }[] {
-    const h = now.getHours();
-    const m = now.getMinutes();
+    const h = now.getUTCHours();
+    const m = now.getUTCMinutes();
     const totalMinutes = h * 60 + m;
 
-    const startOfToday = new Date(now);
-    startOfToday.setHours(0, 0, 0, 0);
+    const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
 
     const results: { shift: string; date: Date }[] = [];
@@ -44,8 +40,13 @@ function getActiveShifts(now: Date): { shift: string; date: Date }[] {
 
 export async function GET(request: Request) {
     try {
-        const now = new Date();
-        const activeShifts = getActiveShifts(now);
+        // Vercel servers run on UTC. Convert to Indonesia WITA timezone (UTC+8) for Plaza Bali (Bali).
+        const nowUTC = new Date();
+        const WITA_OFFSET_MS = 8 * 60 * 60 * 1000; // UTC+8
+        // Create a "fake" date whose UTC fields represent local WITA time
+        const nowWITA = new Date(nowUTC.getTime() + WITA_OFFSET_MS);
+
+        const activeShifts = getActiveShifts(nowWITA);
 
         if (activeShifts.length === 0) {
             return NextResponse.json({ agentName: null, message: "Tidak ada shift aktif saat ini" });
