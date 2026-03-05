@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { getSystemSettings } from './settings';
+import { getSystemSettingsAsync } from './settings';
 import { prisma } from './db';
 import path from 'path';
 
@@ -17,7 +17,7 @@ const createTransporter = () => {
 
 export class EmailService {
     static async sendNotification(to: string, subject: string, html: string, attachments: any[] = []) {
-        const settings = getSystemSettings();
+        const settings = await getSystemSettingsAsync();
         if (!settings.notification?.emailEnabled) {
             console.log("Email notification skipped: Disabled in system settings.");
             return false;
@@ -66,7 +66,7 @@ export class EmailService {
     }
 
     static async notifyNewTicket(ticket: any, creatorName: string) {
-        const settings = getSystemSettings();
+        const settings = await getSystemSettingsAsync();
         if (!settings.notification?.notifyOnCreate) return;
 
         const toEmails = await this.getAdminEmails();
@@ -157,7 +157,7 @@ export class EmailService {
     }
 
     static async notifyTicketAssigned(ticket: any, assigneeName: string, assignedByName: string) {
-        const settings = getSystemSettings();
+        const settings = await getSystemSettingsAsync();
         if (!settings.notification?.notifyOnAssign) return;
 
         let toEmail = null;
@@ -203,7 +203,7 @@ export class EmailService {
     }
 
     static async notifyTicketStatusChange(ticket: any, oldStatus: string, newStatus: string, changedByName: string) {
-        const settings = getSystemSettings();
+        const settings = await getSystemSettingsAsync();
         if (!settings.notification?.notifyOnStatusChange) return;
 
         let toEmail = null;
@@ -249,7 +249,7 @@ export class EmailService {
     }
 
     static async notifyTicketComment(ticket: any, commenterName: string, commentContent: string) {
-        const settings = getSystemSettings();
+        const settings = await getSystemSettingsAsync();
         if (!settings.notification?.notifyOnComment) return;
 
         // Truncate comment if too long
