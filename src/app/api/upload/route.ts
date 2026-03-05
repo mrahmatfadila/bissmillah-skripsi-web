@@ -3,9 +3,41 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { getSystemSettings } from '@/lib/settings';
+import { v2 as cloudinary } from 'cloudinary';
 
 export const dynamic = 'force-dynamic';
 
+// Configure Cloudinary if env vars are present
+const isCloudinaryConfigured =
+    process.env.CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET;
+
+if (isCloudinaryConfigured) {
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+}
+
+async function uploadToCloudinary(buffer: Buffer, filename: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                folder: 'it-ticketing',
+                public_id: filename.replace(/\.[^/.]+$/, ''), // remove extension
+                resource_type: 'auto',
+                overwrite: true,
+            },
+            (error, result) => {
+                if (error) reject(error);
+                else resolve(result!.secure_url);
+            }
+        );
+        uploadStream.end(buffer);
+    });
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -37,22 +69,26 @@ export async function POST(request: NextRequest) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        // Create uploads directory if it doesn't exist
-        const uploadsDir = join(process.cwd(), 'public', 'uploads');
-        if (!existsSync(uploadsDir)) {
-            await mkdir(uploadsDir, { recursive: true });
-        }
-
         // Generate unique filename
         const timestamp = Date.now();
         const randomString = Math.random().toString(36).substring(7);
         const filename = `${timestamp}-${randomString}.${extension}`;
 
-        const filepath = join(uploadsDir, filename);
-        await writeFile(filepath, buffer);
+        let fileUrl: string;
 
-        // Return the public URL
-        const fileUrl = `/uploads/${filename}`;
+        if (isCloudinaryConfigured) {
+            // Upload to Cloudinary (persistent cloud storage)
+            fileUrl = await uploadToCloudinary(buffer, filename);
+        } else {
+            // Fallback: Save locally
+            const uploadsDir = join(process.cwd(), 'public', 'uploads');
+            if (!existsSync(uploadsDir)) {
+                await mkdir(uploadsDir, { recursive: true });
+            }
+            const filepath = join(uploadsDir, filename);
+            await writeFile(filepath, buffer);
+            fileUrl = `/uploads/${filename}`;
+        }
 
         return NextResponse.json({
             success: true,
