@@ -156,3 +156,11 @@ model ShiftSwapRequest {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
+model SystemSetting {
+  id        String   @id @default("singleton")
+  data      String   // JSON string of all settings
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+
