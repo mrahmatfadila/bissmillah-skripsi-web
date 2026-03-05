@@ -15,12 +15,12 @@ import { Button } from "@/components/ui/button";
 import {
     AlertTriangle, CheckCircle2, RefreshCw, Tag, FileText, Type,
     UserX, MessageSquare, Building2, Clock, ShieldAlert, Loader2,
-    ClipboardCheck, Activity, TrendingUp, Copy,
+    ClipboardCheck, Activity, TrendingUp, Copy, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from "recharts";
 
-/* ─── Types ────────────────────────────────────── */
+/* ─── Types ─────────────────────────────────────── */
 interface IssueStat {
     label: string;
     count: number;
@@ -28,7 +28,6 @@ interface IssueStat {
     color: string;
     icon: string;
 }
-
 interface LowQualityTicket {
     id: string;
     ticketNumber: string;
@@ -36,12 +35,10 @@ interface LowQualityTicket {
     score: number;
     issues: string[];
 }
-
 interface DuplicateTitle {
     title: string;
     count: number;
 }
-
 interface QualityData {
     summary: {
         total: number;
@@ -55,7 +52,7 @@ interface QualityData {
     lowQualityTickets: LowQualityTicket[];
 }
 
-/* ─── Icon Map ─────────────────────────────────── */
+/* ─── Icon Map ───────────────────────────────────── */
 const ICON_MAP: Record<string, React.ReactNode> = {
     tag: <Tag className="w-4 h-4" />,
     "file-text": <FileText className="w-4 h-4" />,
@@ -68,7 +65,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     "check-circle": <CheckCircle2 className="w-4 h-4" />,
 };
 
-/* ─── Score Badge ──────────────────────────────── */
+/* ─── Score Badge ────────────────────────────────── */
 function ScoreBadge({ score }: { score: number }) {
     const max = 6;
     const pct = (score / max) * 100;
@@ -77,22 +74,15 @@ function ScoreBadge({ score }: { score: number }) {
     return <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800 font-semibold">{score}/{max}</Badge>;
 }
 
-/* ─── Quality Gauge ────────────────────────────── */
+/* ─── Quality Gauge ──────────────────────────────── */
 function QualityGauge({ score }: { score: number }) {
     const color = score >= 80 ? "#10b981" : score >= 60 ? "#f59e0b" : "#ef4444";
     const data = [{ value: score, fill: color }];
     const label = score >= 80 ? "Baik" : score >= 60 ? "Cukup" : "Buruk";
-
     return (
         <div className="relative w-44 h-44 mx-auto">
             <ResponsiveContainer width="100%" height="100%">
-                <RadialBarChart
-                    innerRadius="70%"
-                    outerRadius="100%"
-                    data={data}
-                    startAngle={90}
-                    endAngle={-270}
-                >
+                <RadialBarChart innerRadius="70%" outerRadius="100%" data={data} startAngle={90} endAngle={-270}>
                     <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
                     <RadialBar dataKey="value" angleAxisId={0} background={{ fill: "hsl(var(--muted))" }} cornerRadius={8} />
                 </RadialBarChart>
@@ -105,28 +95,272 @@ function QualityGauge({ score }: { score: number }) {
     );
 }
 
-/* ─── Main Page ────────────────────────────────── */
+/* ─── PDF Export ─────────────────────────────────── */
+async function exportToPDF(data: QualityData, userName: string) {
+    const { default: jsPDF } = await import("jspdf");
+    const { default: autoTable } = await import("jspdf-autotable");
+
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("id-ID", {
+        day: "2-digit", month: "long", year: "numeric",
+        hour: "2-digit", minute: "2-digit",
+    });
+
+    const { summary, issueBreakdown, duplicateTitles, lowQualityTickets } = data;
+
+    // ── Palette ───────────────────────────────────────
+    const blue = [37, 99, 235] as [number, number, number];
+    const white = [255, 255, 255] as [number, number, number];
+    const gray100 = [248, 250, 252] as [number, number, number];
+    const gray700 = [55, 65, 81] as [number, number, number];
+    const gray400 = [156, 163, 175] as [number, number, number];
+    const green = [16, 185, 129] as [number, number, number];
+    const amber = [245, 158, 11] as [number, number, number];
+    const red = [239, 68, 68] as [number, number, number];
+
+    const scoreColor: [number, number, number] =
+        summary.qualityScore >= 80 ? green :
+            summary.qualityScore >= 60 ? amber : red;
+
+    // ── HEADER BANNER ─────────────────────────────────
+    doc.setFillColor(...blue);
+    doc.rect(0, 0, pageW, 38, "F");
+
+    doc.setTextColor(...white);
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("Laporan Kualitas Data Tiket", 14, 16);
+
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("IT Ticketing Support System — Sistem Manajemen Tiket", 14, 23);
+    doc.text(`Dibuat oleh  :  ${userName}`, 14, 29);
+    doc.text(`Dicetak pada :  ${dateStr}`, 14, 34);
+
+    // Quality Score badge top-right
+    const qx = pageW - 40;
+    doc.setFillColor(...scoreColor);
+    doc.roundedRect(qx - 4, 8, 34, 22, 3, 3, "F");
+    doc.setTextColor(...white);
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${summary.qualityScore}%`, qx + 8, 20, { align: "center" });
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "normal");
+    doc.text("Skor Kualitas", qx + 8, 26, { align: "center" });
+
+    let y = 46;
+
+    // ── SUMMARY CARDS ─────────────────────────────────
+    doc.setTextColor(...gray700);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Ringkasan Analisis", 14, y);
+    y += 5;
+
+    const cards = [
+        { label: "Total Tiket", value: summary.total, color: blue },
+        { label: "Tiket Bersih", value: summary.cleanTickets, color: green },
+        { label: "Tiket Bermasalah", value: summary.flaggedTickets, color: amber },
+        { label: "Judul Duplikat", value: summary.duplicateTitles, color: [168, 85, 247] as [number, number, number] },
+    ];
+
+    const cardW = (pageW - 28 - 9) / 4;
+    cards.forEach((c, i) => {
+        const cx = 14 + i * (cardW + 3);
+        doc.setFillColor(...c.color);
+        doc.roundedRect(cx, y, cardW, 20, 2, 2, "F");
+        doc.setTextColor(...white);
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.text(c.value.toLocaleString(), cx + cardW / 2, y + 11, { align: "center" });
+        doc.setFontSize(7);
+        doc.setFont("helvetica", "normal");
+        doc.text(c.label, cx + cardW / 2, y + 17, { align: "center" });
+    });
+
+    y += 28;
+
+    // ── INTERPRETASI SKOR ─────────────────────────────
+    doc.setFontSize(7.5);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(...gray400);
+    const interp =
+        summary.qualityScore >= 80
+            ? `Kualitas data BAIK — ${summary.qualityScore}% kriteria terpenuhi. Pertahankan standar pengisian tiket.`
+            : summary.qualityScore >= 60
+                ? `Kualitas data CUKUP — ${summary.qualityScore}%. Perlu perbaikan pada tiket bermasalah di bawah.`
+                : `Kualitas data BURUK — ${summary.qualityScore}%. Segera tindaklanjuti tiket bermasalah.`;
+    doc.text(interp, 14, y);
+    y += 8;
+
+    // ── RINCIAN PERMASALAHAN ──────────────────────────
+    doc.setTextColor(...gray700);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Rincian Permasalahan Data", 14, y);
+    y += 4;
+
+    const issueRows = issueBreakdown
+        .filter(i => i.count > 0)
+        .map(i => [
+            i.label,
+            i.count.toString(),
+            `${i.percentage.toFixed(1)}%`,
+            i.count === 0 ? "✓ Bersih" : "⚠ Ada Masalah",
+        ]);
+
+    if (issueRows.length === 0) {
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "italic");
+        doc.setTextColor(...gray400);
+        doc.text("Tidak ada masalah terdeteksi — semua data bersih ✓", 14, y + 6);
+        y += 14;
+    } else {
+        autoTable(doc, {
+            startY: y,
+            head: [["Kategori Masalah", "Jumlah Tiket", "Persentase", "Status"]],
+            body: issueRows,
+            theme: "striped",
+            headStyles: { fillColor: blue, textColor: white, fontStyle: "bold", fontSize: 8 },
+            bodyStyles: { fontSize: 8, textColor: gray700 },
+            alternateRowStyles: { fillColor: gray100 },
+            columnStyles: {
+                0: { cellWidth: 80 },
+                1: { cellWidth: 28, halign: "center" },
+                2: { cellWidth: 28, halign: "center" },
+                3: { cellWidth: 44, halign: "center" },
+            },
+            margin: { left: 14, right: 14 },
+        });
+        y = (doc as any).lastAutoTable.finalY + 8;
+    }
+
+    // ── JUDUL DUPLIKAT ────────────────────────────────
+    if (duplicateTitles.length > 0) {
+        // Check if need new page
+        if (y > 230) { doc.addPage(); y = 20; }
+
+        doc.setTextColor(...gray700);
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.text("Judul Tiket Duplikat", 14, y);
+        y += 4;
+
+        autoTable(doc, {
+            startY: y,
+            head: [["Judul Duplikat", "Jumlah Tiket"]],
+            body: duplicateTitles.map(d => [d.title, `${d.count}x`]),
+            theme: "striped",
+            headStyles: { fillColor: [126, 34, 206] as [number, number, number], textColor: white, fontStyle: "bold", fontSize: 8 },
+            bodyStyles: { fontSize: 8, textColor: gray700 },
+            alternateRowStyles: { fillColor: gray100 },
+            columnStyles: {
+                0: { cellWidth: 155 },
+                1: { cellWidth: 25, halign: "center" },
+            },
+            margin: { left: 14, right: 14 },
+        });
+        y = (doc as any).lastAutoTable.finalY + 8;
+    }
+
+    // ── DAFTAR TIKET BERMASALAH ───────────────────────
+    if (lowQualityTickets.length > 0) {
+        if (y > 200) { doc.addPage(); y = 20; }
+
+        doc.setTextColor(...gray700);
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.text("Daftar Tiket Bermasalah", 14, y);
+        y += 4;
+
+        autoTable(doc, {
+            startY: y,
+            head: [["No. Tiket", "Judul", "Skor", "Masalah Terdeteksi"]],
+            body: lowQualityTickets.map(t => [
+                t.ticketNumber,
+                t.title.length > 48 ? t.title.slice(0, 48) + "…" : t.title,
+                `${t.score}/6`,
+                t.issues.join(", "),
+            ]),
+            theme: "striped",
+            headStyles: { fillColor: [217, 119, 6] as [number, number, number], textColor: white, fontStyle: "bold", fontSize: 8 },
+            bodyStyles: { fontSize: 7.5, textColor: gray700 },
+            alternateRowStyles: { fillColor: gray100 },
+            columnStyles: {
+                0: { cellWidth: 28, halign: "center" },
+                1: { cellWidth: 65 },
+                2: { cellWidth: 16, halign: "center" },
+                3: { cellWidth: 71 },
+            },
+            margin: { left: 14, right: 14 },
+            didParseCell: (data) => {
+                if (data.column.index === 2 && data.section === "body") {
+                    const val = parseInt(data.cell.text[0]);
+                    data.cell.styles.textColor =
+                        val >= 5 ? green : val >= 3 ? amber : red;
+                    data.cell.styles.fontStyle = "bold";
+                }
+            },
+        });
+    }
+
+    // ── FOOTER PER PAGE ───────────────────────────────
+    const totalPages = doc.getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        const footerY = doc.internal.pageSize.getHeight() - 8;
+        doc.setDrawColor(...gray400);
+        doc.setLineWidth(0.3);
+        doc.line(14, footerY - 3, pageW - 14, footerY - 3);
+        doc.setFontSize(7);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...gray400);
+        doc.text("IT Ticketing Support System — Laporan Kualitas Data", 14, footerY);
+        doc.text(`Halaman ${p} dari ${totalPages}`, pageW - 14, footerY, { align: "right" });
+    }
+
+    const filename = `laporan-kualitas-data_${now.toISOString().slice(0, 10)}.pdf`;
+    doc.save(filename);
+    return filename;
+}
+
+/* ─── Main Page ──────────────────────────────────── */
 export default function DataQualityPage() {
     const { data: session } = useSession();
     const router = useRouter();
     const [data, setData] = useState<QualityData | null>(null);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [exporting, setExporting] = useState(false);
 
     const fetchData = async (isRefresh = false) => {
-        if (isRefresh) setRefreshing(true);
-        else setLoading(true);
+        if (isRefresh) setRefreshing(true); else setLoading(true);
         try {
             const res = await fetch("/api/data-quality");
-            if (!res.ok) throw new Error("Failed to fetch");
-            const json = await res.json();
-            setData(json);
+            if (!res.ok) throw new Error("Failed");
+            setData(await res.json());
             if (isRefresh) toast.success("Data berhasil diperbarui");
         } catch {
             toast.error("Gagal memuat data kualitas");
         } finally {
-            setLoading(false);
-            setRefreshing(false);
+            setLoading(false); setRefreshing(false);
+        }
+    };
+
+    const handleExportPDF = async () => {
+        if (!data) return;
+        setExporting(true);
+        try {
+            const filename = await exportToPDF(data, session?.user?.name || "Admin");
+            toast.success(`PDF berhasil diunduh: ${filename}`);
+        } catch (e) {
+            console.error(e);
+            toast.error("Gagal membuat PDF, coba lagi");
+        } finally {
+            setExporting(false);
         }
     };
 
@@ -157,19 +391,33 @@ export default function DataQualityPage() {
                             Kualitas Data Tiket
                         </h1>
                         <p className="text-sm text-muted-foreground mt-1">
-                            Analisis integritas & kelengkapan data dari {summary.total.toLocaleString()} tiket sistem
+                            Analisis integritas &amp; kelengkapan data dari {summary.total.toLocaleString()} tiket sistem
                         </p>
                     </div>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => fetchData(true)}
-                        disabled={refreshing}
-                        className="self-start sm:self-auto gap-2"
-                    >
-                        <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-                        Perbarui Analisis
-                    </Button>
+                    <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => fetchData(true)}
+                            disabled={refreshing}
+                            className="gap-2"
+                        >
+                            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+                            Perbarui
+                        </Button>
+                        <Button
+                            size="sm"
+                            onClick={handleExportPDF}
+                            disabled={exporting}
+                            className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                            {exporting
+                                ? <Loader2 className="w-4 h-4 animate-spin" />
+                                : <Download className="w-4 h-4" />
+                            }
+                            {exporting ? "Membuat PDF..." : "Unduh Laporan PDF"}
+                        </Button>
+                    </div>
                 </div>
 
                 {/* ── Top Summary Cards ── */}
@@ -196,7 +444,6 @@ export default function DataQualityPage() {
 
                 {/* ── Quality Score + Issue Breakdown ── */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
                     {/* Score Gauge */}
                     <Card className="lg:col-span-1 shadow-sm">
                         <CardHeader className="pb-2">
@@ -243,10 +490,7 @@ export default function DataQualityPage() {
                             ) : (
                                 issueBreakdown.map((issue) => (
                                     <div key={issue.label} className="flex items-center gap-3">
-                                        <div
-                                            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white"
-                                            style={{ backgroundColor: issue.color }}
-                                        >
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: issue.color }}>
                                             {ICON_MAP[issue.icon]}
                                         </div>
                                         <div className="flex-1 min-w-0">
@@ -256,11 +500,7 @@ export default function DataQualityPage() {
                                                     {issue.count} tiket
                                                 </span>
                                             </div>
-                                            <Progress
-                                                value={issue.percentage}
-                                                className="h-1.5"
-                                                style={{ ['--progress-color' as string]: issue.color }}
-                                            />
+                                            <Progress value={issue.percentage} className="h-1.5" />
                                         </div>
                                         <span className="text-xs text-muted-foreground w-10 text-right shrink-0">
                                             {issue.percentage.toFixed(1)}%
@@ -285,10 +525,7 @@ export default function DataQualityPage() {
                         <CardContent>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                 {duplicateTitles.map((d) => (
-                                    <div
-                                        key={d.title}
-                                        className="p-3 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20 flex items-start gap-3"
-                                    >
+                                    <div key={d.title} className="p-3 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20 flex items-start gap-3">
                                         <div className="w-7 h-7 rounded-full bg-purple-500 text-white text-xs font-bold flex items-center justify-center shrink-0">
                                             {d.count}x
                                         </div>
@@ -303,13 +540,17 @@ export default function DataQualityPage() {
                 {/* ── Low Quality Tickets Table ── */}
                 <Card className="shadow-sm">
                     <CardHeader className="pb-3">
-                        <CardTitle className="text-base flex items-center gap-2">
-                            <AlertTriangle className="w-4 h-4 text-amber-500" />
-                            Daftar Tiket Bermasalah
-                        </CardTitle>
-                        <CardDescription>
-                            {lowQualityTickets.length} tiket dengan skor kualitas terendah — perlu perhatian segera
-                        </CardDescription>
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                            <div>
+                                <CardTitle className="text-base flex items-center gap-2">
+                                    <AlertTriangle className="w-4 h-4 text-amber-500" />
+                                    Daftar Tiket Bermasalah
+                                </CardTitle>
+                                <CardDescription className="mt-1">
+                                    {lowQualityTickets.length} tiket dengan skor kualitas terendah — klik baris untuk buka detail
+                                </CardDescription>
+                            </div>
+                        </div>
                     </CardHeader>
                     <CardContent className="p-0">
                         {lowQualityTickets.length === 0 ? (
@@ -349,10 +590,7 @@ export default function DataQualityPage() {
                                                 <TableCell>
                                                     <div className="flex flex-wrap gap-1">
                                                         {ticket.issues.map((issue) => (
-                                                            <span
-                                                                key={issue}
-                                                                className="inline-flex items-center text-[11px] px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
-                                                            >
+                                                            <span key={issue} className="inline-flex items-center text-[11px] px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
                                                                 {issue}
                                                             </span>
                                                         ))}
