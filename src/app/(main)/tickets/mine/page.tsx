@@ -100,7 +100,7 @@ export default function MyTicketsPage() {
 
     return (
         <div className="bg-background min-h-screen p-8">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
                         Tiket Saya
@@ -160,7 +160,7 @@ export default function MyTicketsPage() {
                                         <div className="p-5 border border-border rounded-lg hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer bg-card">
                                             <div className="flex items-start justify-between mb-3">
                                                 <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-2">
+                                                    <div className="flex flex-wrap items-center gap-2 mb-2">
                                                         <span className="text-sm font-mono font-semibold text-blue-600">
                                                             {ticket.ticketNumber || `#${ticket.id.slice(-6).toUpperCase()}`}
                                                         </span>

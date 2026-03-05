@@ -116,7 +116,7 @@ export default function ScheduleUploadPage() {
                     </div>
 
                     {/* Shift code legend */}
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                         {CODES.map(s => (
                             <div key={s.code} className={`flex flex-col items-center py-2 rounded-lg ${s.color}`}>
                                 <span className="text-2xl font-black leading-tight">{s.code}</span>

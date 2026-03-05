@@ -258,7 +258,7 @@ export default async function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-gray-50/50 dark:bg-black/20 pb-10">
-            <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
+            <div className="p-4 md:p-6 space-y-4 md:space-y-6 max-w-[1600px] mx-auto">
 
                 {/* Section 1: Top Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">

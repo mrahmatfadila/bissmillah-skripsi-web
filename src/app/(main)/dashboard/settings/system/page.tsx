@@ -287,10 +287,10 @@ export default function SystemSettingsPage() {
                     </div>
                 )}
 
-                <div className="flex gap-6">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                     {/* Sidebar Tabs */}
-                    <div className="w-56 flex-shrink-0">
-                        <div className="bg-card rounded-xl border border-border p-2 space-y-1 sticky top-24">
+                    <div className="w-full md:w-56 flex-shrink-0">
+                        <div className="bg-card rounded-xl border border-border p-2 flex overflow-x-auto md:flex-col gap-2 md:gap-0 md:space-y-1 sticky top-24 z-10 custom-scrollbar">
                             {TABS.map((tab) => {
                                 const Icon = tab.icon;
                                 const isActive = activeTab === tab.id;
@@ -298,13 +298,13 @@ export default function SystemSettingsPage() {
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive
+                                        className={`w-auto md:w-full flex-shrink-0 flex items-center gap-2 md:gap-3 px-3 md:px-3 py-2 md:py-2.5 rounded-lg text-sm font-medium transition-all ${isActive
                                             ? "bg-primary text-white shadow-sm"
                                             : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                             }`}
                                     >
                                         <Icon className={`w-4 h-4 ${isActive ? "text-white" : tab.color}`} />
-                                        {tab.label}
+                                        <span className="whitespace-nowrap">{tab.label}</span>
                                     </button>
                                 );
                             })}
@@ -325,7 +325,7 @@ export default function SystemSettingsPage() {
                                         <CardDescription>Pengaturan dasar aplikasi dan identitas perusahaan</CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <Label htmlFor="appName">Nama Aplikasi</Label>
                                                 <Input
@@ -345,7 +345,7 @@ export default function SystemSettingsPage() {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <Label htmlFor="supportEmail">Email Support</Label>
                                                 <Input
@@ -378,7 +378,7 @@ export default function SystemSettingsPage() {
                                         <CardDescription>Pengaturan bahasa, zona waktu, dan format tampilan</CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
-                                        <div className="grid grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             <div className="space-y-2">
                                                 <Label>Zona Waktu</Label>
                                                 <Select
@@ -444,7 +444,7 @@ export default function SystemSettingsPage() {
                                         <CardDescription>Konfigurasi perilaku dan aturan tiket</CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-5">
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <Label htmlFor="ticketPrefix">Prefiks Nomor Tiket</Label>
                                                 <Input
@@ -538,7 +538,7 @@ export default function SystemSettingsPage() {
 
                                         <Separator />
 
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <Label htmlFor="maxAttachmentSize">Ukuran Lampiran Maks (MB)</Label>
                                                 <Input
@@ -745,7 +745,7 @@ export default function SystemSettingsPage() {
                                         <CardDescription>Pengaturan keamanan akses dan autentikasi pengguna</CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-5">
-                                        <div className="grid grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             <div className="space-y-2">
                                                 <Label htmlFor="sessionTimeout">Timeout Sesi (menit)</Label>
                                                 <Input
@@ -882,7 +882,7 @@ export default function SystemSettingsPage() {
                                                 <Separator />
                                                 <div className="space-y-4">
                                                     <h4 className="text-sm font-semibold text-foreground/80">Target Waktu Penyelesaian</h4>
-                                                    <div className="grid grid-cols-2 gap-4">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         {[
                                                             { key: "criticalHours", label: "🔴 Kritis", color: "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20", textColor: "text-red-700 dark:text-red-400" },
                                                             { key: "highHours", label: "🟠 Tinggi", color: "border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20", textColor: "text-orange-700 dark:text-orange-400" },
@@ -1017,7 +1017,7 @@ export default function SystemSettingsPage() {
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {[
                                                 { label: "Framework", value: "Next.js 14" },
                                                 { label: "Database", value: "PostgreSQL" },

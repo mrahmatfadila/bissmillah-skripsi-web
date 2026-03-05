@@ -224,7 +224,7 @@ export default function AHPSettingsPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* 1. Criteria Management */}
-                    <div className="lg:col-span-1 space-y-6">
+                    <div className="lg:col-start-1 lg:col-end-2 order-1">
                         <Card>
                             <CardHeader>
                                 <CardTitle>1. Definisi Kriteria</CardTitle>
@@ -248,52 +248,10 @@ export default function AHPSettingsPage() {
                                 </Button>
                             </CardContent>
                         </Card>
-
-                        {/* Results Card */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>3. Hasil Bobot</CardTitle>
-                                <CardDescription>Bobot kalkulasi dari perbandingan.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-3">
-                                    {criteria.map((c, idx) => (
-                                        <div key={idx} className="flex justify-between items-center">
-                                            <span className="text-sm font-medium">{c.name}</span>
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                                                    <div className="h-full bg-blue-600" style={{ width: `${(c.weight * 100).toFixed(1)}%` }} />
-                                                </div>
-                                                <span className="text-sm font-bold">{(c.weight * 100).toFixed(1)}%</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {consistencyRatio !== null && (
-                                    <Alert className={`mt-6 ${consistencyRatio > 0.1 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'}`}>
-                                        <Info className={`w-4 h-4 ${consistencyRatio > 0.1 ? 'text-red-600' : 'text-green-600'}`} />
-                                        <AlertTitle className={`${consistencyRatio > 0.1 ? 'text-red-800 dark:text-red-400' : 'text-green-800 dark:text-green-400'}`}>
-                                            Consistency Ratio (CR): {consistencyRatio.toFixed(3)}
-                                        </AlertTitle>
-                                        <AlertDescription className="text-xs text-muted-foreground mt-1">
-                                            {consistencyRatio <= 0.1
-                                                ? "Matriks perbandingan KONSISTEN. Bobot valid untuk digunakan."
-                                                : "Matriks TIDAK KONSISTEN (>0.1). Mohon perbaiki perbandingan Anda."}
-                                        </AlertDescription>
-                                    </Alert>
-                                )}
-
-                                <Button disabled={!consistencyRatio || saving} onClick={handleSave} className="w-full mt-4 bg-green-600 hover:bg-green-700">
-                                    {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                                    Simpan Konfigurasi
-                                </Button>
-                            </CardContent>
-                        </Card>
                     </div>
 
                     {/* 2. Pairwise Matrix */}
-                    <div className="lg:col-span-2">
+                    <div className="lg:col-start-2 lg:col-end-4 lg:row-span-2 order-2">
                         <Card className="h-full">
                             <CardHeader>
                                 <CardTitle>2. Matriks Perbandingan Berpasangan</CardTitle>
@@ -376,8 +334,53 @@ export default function AHPSettingsPage() {
                             </CardContent>
                         </Card>
                     </div>
+
+                    {/* 3. Results Card */}
+                    <div className="lg:col-start-1 lg:col-end-2 order-3 space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>3. Hasil Bobot</CardTitle>
+                                <CardDescription>Bobot kalkulasi dari perbandingan.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-3">
+                                    {criteria.map((c, idx) => (
+                                        <div key={idx} className="flex justify-between items-center">
+                                            <span className="text-sm font-medium">{c.name}</span>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                                                    <div className="h-full bg-blue-600" style={{ width: `${(c.weight * 100).toFixed(1)}%` }} />
+                                                </div>
+                                                <span className="text-sm font-bold">{(c.weight * 100).toFixed(1)}%</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {consistencyRatio !== null && (
+                                    <Alert className={`mt-6 ${consistencyRatio > 0.1 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'}`}>
+                                        <Info className={`w-4 h-4 ${consistencyRatio > 0.1 ? 'text-red-600' : 'text-green-600'}`} />
+                                        <AlertTitle className={`${consistencyRatio > 0.1 ? 'text-red-800 dark:text-red-400' : 'text-green-800 dark:text-green-400'}`}>
+                                            Consistency Ratio (CR): {consistencyRatio.toFixed(3)}
+                                        </AlertTitle>
+                                        <AlertDescription className="text-xs text-muted-foreground mt-1">
+                                            {consistencyRatio <= 0.1
+                                                ? "Matriks perbandingan KONSISTEN. Bobot valid untuk digunakan."
+                                                : "Matriks TIDAK KONSISTEN (>0.1). Mohon perbaiki perbandingan Anda."}
+                                        </AlertDescription>
+                                    </Alert>
+                                )}
+
+                                <Button disabled={!consistencyRatio || saving} onClick={handleSave} className="w-full mt-4 bg-green-600 hover:bg-green-700">
+                                    {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                                    Simpan Konfigurasi
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </div>
+
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

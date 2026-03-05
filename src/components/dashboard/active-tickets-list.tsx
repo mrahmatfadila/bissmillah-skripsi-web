@@ -75,33 +75,33 @@ export function ActiveTicketsList({ tickets: allTickets }: { tickets: any[] }) {
                         tickets.map((ticket) => (
                             <Link key={ticket.id} href={`/tickets/${ticket.id}`}>
                                 <div className="p-4 rounded-xl border border-border hover:shadow-md transition-shadow bg-card mb-2 cursor-pointer">
-                                    <div className="flex items-start justify-between mb-2">
-                                        <p className="text-sm text-muted-foreground truncate w-3/4">{ticket.title}</p>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs text-muted-foreground">
+                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-2 gap-2">
+                                        <p className="text-sm font-medium text-foreground line-clamp-2 sm:truncate w-full sm:w-3/4">{ticket.title}</p>
+                                        <div className="flex items-center gap-2 self-start sm:self-auto">
+                                            <span className="text-xs text-muted-foreground whitespace-nowrap">
                                                 {formatDate(ticket.createdAt)}
                                             </span>
-                                            <Badge variant="secondary" className="border-none">{ticket.status}</Badge>
+                                            <Badge variant="secondary" className="border-none whitespace-nowrap">{ticket.status}</Badge>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-2">
                                         <div className="flex items-center gap-3">
                                             <Avatar className="h-8 w-8">
                                                 <AvatarImage src={ticket.creator.image || `https://ui-avatars.com/api/?name=${ticket.creator.name}&background=random`} />
                                                 <AvatarFallback>{ticket.creator.name?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
                                             </Avatar>
-                                            <div>
-                                                <p className="text-sm font-semibold text-foreground">{ticket.creator.name}</p>
-                                                <p className="text-[10px] text-muted-foreground">{ticket.creator.department || 'Staff'}</p>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-foreground truncate">{ticket.creator.name}</p>
+                                                <p className="text-[10px] text-muted-foreground truncate">{ticket.creator.department || 'Staff'}</p>
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-6 text-xs text-muted-foreground hidden md:flex">
-                                            <span className="flex items-center gap-1">
+                                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                            <span className="flex items-center gap-1 whitespace-nowrap border-r border-border pr-4">
                                                 {ticket.category || 'General'}
                                             </span>
-                                            <span className={`font-medium ${ticket.priority === 'CRITICAL' ? 'text-red-600' : ticket.priority === 'HIGH' ? 'text-red-500' : ticket.priority === 'MEDIUM' ? 'text-orange-500' : 'text-green-500'}`}>
+                                            <span className={`font-medium whitespace-nowrap ${ticket.priority === 'CRITICAL' ? 'text-red-600' : ticket.priority === 'HIGH' ? 'text-red-500' : ticket.priority === 'MEDIUM' ? 'text-orange-500' : 'text-green-500'}`}>
                                                 {ticket.priority}
                                             </span>
                                         </div>
@@ -117,7 +117,7 @@ export function ActiveTicketsList({ tickets: allTickets }: { tickets: any[] }) {
                         <p className="text-xs text-muted-foreground">
                             Halaman {currentPage} dari {totalPages}
                         </p>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 flex-wrap justify-center">
                             <Button
                                 variant="outline"
                                 size="sm"
