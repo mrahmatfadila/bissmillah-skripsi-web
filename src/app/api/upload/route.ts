@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { getSystemSettings } from '@/lib/settings';
+import { getSystemSettingsAsync } from '@/lib/settings';
 import { v2 as cloudinary } from 'cloudinary';
 
 export const dynamic = 'force-dynamic';
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
         }
 
-        const settings = getSystemSettings();
+        const settings = await getSystemSettingsAsync();
         const extension = file.name.split('.').pop()?.toLowerCase() || '';
 
         // Validate file type

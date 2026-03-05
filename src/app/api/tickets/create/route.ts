@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db';
 import { generateTicketNumber } from '@/lib/ticket-number';
 import { WhatsAppService } from '@/lib/whatsapp';
 import { EmailService } from '@/lib/email';
-import { getSystemSettings } from '@/lib/settings';
+import { getSystemSettingsAsync } from '@/lib/settings';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
         const body = await request.json();
         const { title, description, priority: manualPriority, category, attachments, ahpScores } = body;
-        const settings = getSystemSettings();
+        const settings = await getSystemSettingsAsync();
 
         if (!title || !description) {
             return NextResponse.json({ error: 'Title and description are required' }, { status: 400 });

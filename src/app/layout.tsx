@@ -3,13 +3,13 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Toaster } from "sonner";
-import { getSystemSettings } from "@/lib/settings";
+import { getSystemSettingsAsync } from "@/lib/settings";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = getSystemSettings();
+  const settings = await getSystemSettingsAsync();
   return {
     title: settings.general.appName || "IT Support",
     description: settings.general.companyName ? `${settings.general.companyName} IT Ticketing Support` : "IT Ticketing Support Information System",
@@ -21,7 +21,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = getSystemSettings();
+  const settings = await getSystemSettingsAsync();
 
   return (
     <html lang={settings.general?.language || "id"} suppressHydrationWarning>

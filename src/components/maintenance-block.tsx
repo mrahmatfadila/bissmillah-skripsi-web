@@ -1,10 +1,10 @@
-import { getSystemSettings } from "@/lib/settings";
+import { getSystemSettingsAsync } from "@/lib/settings";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { headers } from "next/headers";
 
 export async function MaintenanceBlock({ children }: { children: React.ReactNode }) {
-    const settings = getSystemSettings();
+    const settings = await getSystemSettingsAsync();
     const session = await getServerSession(authOptions);
 
     const isMaintenanceMode = settings.maintenance?.maintenanceMode;
