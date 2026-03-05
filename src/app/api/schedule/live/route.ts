@@ -3,6 +3,9 @@ import { prisma } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 
+
+
+
 /**
  * P (Pagi)  = 06:00 - 15:00
  * S (Siang) = 13:30 - 22:30

@@ -1,11 +1,12 @@
-export const dynamic = 'force-dynamic';
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import fs from 'fs';
 import path from 'path';
 import { getSystemSettings, DEFAULT_SETTINGS } from '@/lib/settings';
+
+export const dynamic = 'force-dynamic';
+
 
 const SETTINGS_FILE = path.join(process.cwd(), 'data', 'system-settings.json');
 

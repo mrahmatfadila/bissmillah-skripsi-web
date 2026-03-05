@@ -5,6 +5,9 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
+
+
+
 export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
     try {
         const params = await props.params;

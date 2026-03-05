@@ -5,6 +5,9 @@ import { authOptions } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
+
+
+
 // GET: Return list of IT Support agent names from schedule
 export async function GET() {
     const session = await getServerSession(authOptions);

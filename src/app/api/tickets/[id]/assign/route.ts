@@ -1,11 +1,12 @@
-export const dynamic = 'force-dynamic';
-
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { WhatsAppService } from '@/lib/whatsapp';
 import { EmailService } from '@/lib/email';
+
+export const dynamic = 'force-dynamic';
+
 
 export async function PUT(
     request: Request,

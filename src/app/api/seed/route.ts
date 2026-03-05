@@ -1,9 +1,10 @@
-export const dynamic = 'force-dynamic';
-
 import { NextResponse } from 'next/server';
 import { Role } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
+
 
 export async function GET() {
     try {

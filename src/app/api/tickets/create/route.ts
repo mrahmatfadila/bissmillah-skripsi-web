@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -8,6 +6,9 @@ import { generateTicketNumber } from '@/lib/ticket-number';
 import { WhatsAppService } from '@/lib/whatsapp';
 import { EmailService } from '@/lib/email';
 import { getSystemSettings } from '@/lib/settings';
+
+export const dynamic = 'force-dynamic';
+
 
 export async function POST(request: Request) {
     try {
