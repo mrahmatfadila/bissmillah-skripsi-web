@@ -34,26 +34,46 @@ interface RolePermissionData {
 }
 
 const PERMISSIONS: Permission[] = [
-    { id: "dashboard", label: "Dashboard", description: "Melihat ringkasan dasbor log masuk" },
-    { id: "activity_log", label: "Log Aktivitas", description: "Melihat log log sejarah aktivitas sistem" },
-    { id: "my_tickets", label: "Manajemen Tiket (Root)", description: "Perlu untuk membuka menu utama Tiket Saya" },
-    { id: "unassigned_tickets", label: "Tiket Belum Ditugaskan", description: "Melihat dan mengklaim tiket baru" },
-    { id: "assigned_tickets", label: "Tugas Saya", description: "Melihat semua tiket yang ditugaskan ke Anda" },
-    { id: "spam_tickets", label: "Tiket Spam", description: "Kemampuan memantau kotak spam" },
-    { id: "status_filters", label: "Filter Status", description: "Melihat daftar tiket yang dikategorikan status" },
-    { id: "departments", label: "Filter Departemen", description: "Klasifikasi tiket berdasarkan departemen creator" },
-    { id: "knowledge_base", label: "Knowledge Base", description: "Melihat artikel database panduan permasalahan" },
-    { id: "shift_schedule", label: "Jadwal Kerja", description: "Melihat Kalender Shift & mengajukan Tukar Shift" },
-    { id: "cctv_issues", label: "Masalah CCTV", description: "Melihat daftar rekaman kerusakan spesifik CCTV" },
-    { id: "edc_issues", label: "Masalah EDC", description: "Daftar pemeliharaan spesifik EDC" },
-    { id: "reports", label: "Laporan Analitik", description: "Melihat laporan kinerja komprehensif" },
-    { id: "data_quality", label: "Kualitas Data", description: "Tinjau skor anomali & kelengkapan deskripsi" },
-    { id: "ahp_config", label: "Konfigurasi AHP", description: "Manajemen prioritas otomatis SPK AHP" },
-    { id: "user_management", label: "Manajemen User", description: "Akses menambah, merubah, & menghapus profil user" },
-    { id: "role_management", label: "Peran & Akses", description: "Ubah halaman matriks izin fitur ini" },
-    { id: "system_settings", label: "Pengaturan Sistem (Admin)", description: "Akses Upload Jadwal PDF, edit SLA, Security, & Notifikasi" },
-    { id: "dev_tools", label: "Developer Tools", description: "Melihat system API, log error dan Semua Tiket" },
-    { id: "profile_settings", label: "Pengaturan Profil & Preferensi", description: "Akses mengubah profil dan preferensi pribadi" },
+    // ── DASHBOARD ──────────────────────────────────
+    { id: "dashboard", label: "Dashboard", description: "Melihat ringkasan statistik & dasbor utama" },
+    { id: "activity_log", label: "Log Aktivitas", description: "Melihat riwayat aktivitas sistem" },
+
+    // ── TIKET ──────────────────────────────────────
+    { id: "my_tickets", label: "Menu Tiket (Akses Root)", description: "Tampilkan grup menu Tiket di sidebar" },
+    { id: "unassigned_tickets", label: "Tiket Belum Ditugaskan", description: "Melihat & mengklaim tiket yang belum ada teknisi" },
+    { id: "assigned_tickets", label: "Tugas Saya", description: "Melihat tiket yang sedang dikerjakan sendiri" },
+    { id: "spam_tickets", label: "Tiket Spam", description: "Memantau & mengelola tiket yang ditandai spam" },
+
+    // ── STATUS & DEPARTEMEN ───────────────────────
+    { id: "status_filters", label: "Filter Status Tiket", description: "Melihat tiket berdasarkan Status (Open, Closed, dll)" },
+    { id: "departments", label: "Filter Departemen", description: "Melihat tiket berdasarkan departemen pengirim" },
+
+    // ── SUMBER DAYA ───────────────────────────────
+    { id: "knowledge_base", label: "Knowledge Base", description: "Melihat & membuat artikel panduan solusi" },
+
+    // ── JADWAL KERJA ──────────────────────────────
+    { id: "shift_schedule", label: "Jadwal Kerja (Kalender & Tukar Shift)", description: "Akses Kalender Shift & form pengajuan Tukar Shift" },
+
+    // ── KEAMANAN & KEUANGAN ───────────────────────
+    { id: "cctv_issues", label: "Masalah CCTV", description: "Melihat & mengelola laporan kerusakan CCTV" },
+    { id: "edc_issues", label: "Masalah EDC", description: "Melihat & mengelola laporan mesin EDC" },
+
+    // ── ANALITIK ──────────────────────────────────
+    { id: "reports", label: "Laporan Analitik", description: "Melihat laporan & grafik kinerja tiket" },
+    { id: "data_quality", label: "Kualitas Data", description: "Melihat skor anomali & kelengkapan data tiket" },
+
+    // ── ADMIN ─────────────────────────────────────
+    { id: "ahp_config", label: "Konfigurasi AHP", description: "Atur bobot kriteria prioritas tiket otomatis" },
+    { id: "user_management", label: "Manajemen User", description: "Tambah, ubah, hapus akun pengguna sistem" },
+    { id: "role_management", label: "Peran & Izin (halaman ini)", description: "Kelola matriks izin akses tiap peran" },
+    { id: "system_settings", label: "Pengaturan Sistem", description: "Edit SLA, Notifikasi, Security & konfigurasi sistem" },
+    { id: "upload_schedule", label: "Upload Jadwal PDF", description: "Unggah file PDF jadwal shift bulanan ke sistem" },
+
+    // ── DEVELOPER ────────────────────────────────
+    { id: "dev_tools", label: "Developer Tools", description: "Akses System Logs, Dokumentasi API, Monitoring & Semua Tiket" },
+
+    // ── AKUN ─────────────────────────────────────
+    { id: "profile_settings", label: "Pengaturan Profil & Preferensi", description: "Edit profil pribadi & preferensi tampilan akun" },
 ];
 
 const ROLE_LABELS: Record<string, { label: string; color: string }> = {

@@ -251,7 +251,7 @@ export function Sidebar() {
                 )}
 
                 {/* Admin */}
-                {(hasPermission("ahp_config") || hasPermission("user_management") || hasPermission("role_management") || hasPermission("system_settings")) && (
+                {(hasPermission("ahp_config") || hasPermission("user_management") || hasPermission("role_management") || hasPermission("system_settings") || hasPermission("upload_schedule")) && (
                     <div>
                         <div className="flex items-center justify-between px-3 mb-2 mt-4">
                             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Admin</h3>
@@ -260,12 +260,8 @@ export function Sidebar() {
                             {hasPermission("ahp_config") && <NavLink href="/dashboard/settings/ahp" icon={Settings} label="Konfigurasi AHP" />}
                             {hasPermission("user_management") && <NavLink href="/dashboard/settings/users" icon={Users} label="Manajemen User" />}
                             {hasPermission("role_management") && <NavLink href="/dashboard/settings/roles" icon={Shield} label="Peran & Izin" />}
-                            {hasPermission("system_settings") && (
-                                <>
-                                    <NavLink href="/dashboard/settings/system" icon={Settings} label="Pengaturan Sistem" />
-                                    <NavLink href="/dashboard/settings/schedule" icon={Clock} label="Upload Jadwal PDF" />
-                                </>
-                            )}
+                            {hasPermission("system_settings") && <NavLink href="/dashboard/settings/system" icon={Settings} label="Pengaturan Sistem" />}
+                            {hasPermission("upload_schedule") && <NavLink href="/dashboard/settings/schedule" icon={Clock} label="Upload Jadwal PDF" />}
                         </div>
                     </div>
                 )}
