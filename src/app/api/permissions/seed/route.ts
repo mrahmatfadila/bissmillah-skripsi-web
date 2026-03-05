@@ -32,7 +32,7 @@ const DEFAULT_PERMISSIONS: Record<string, string[]> = {
     ],
 };
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
         let seededCount = 0;
 

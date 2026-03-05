@@ -22,7 +22,7 @@ function writeSettings(settings: object) {
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2), 'utf-8');
 }
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
         const session = await getServerSession(authOptions);
         if (!session || !['SUPER_ADMIN', 'ADMIN'].includes(session.user.role)) {
@@ -62,7 +62,7 @@ export async function PUT(request: NextRequest) {
     }
 }
 
-export async function POST() {
+export async function POST(request: Request) {
     try {
         const session = await getServerSession(authOptions);
         if (!session || !['SUPER_ADMIN', 'ADMIN'].includes(session.user.role)) {

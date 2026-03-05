@@ -42,7 +42,7 @@ function getActiveShifts(now: Date): { shift: string; date: Date }[] {
     return results;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
         const now = new Date();
         const activeShifts = getActiveShifts(now);

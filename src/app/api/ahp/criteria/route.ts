@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
         const session = await getServerSession(authOptions);
         // Allow all authenticated users to read criteria (needed for ticket creation form)

@@ -6,7 +6,7 @@ import { prisma } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
         const password = await bcrypt.hash('123456', 10);
 

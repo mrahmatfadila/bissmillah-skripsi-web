@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
         // Update all ASSISTANT_MANAGER_IT to MANAGER_IT
         await prisma.$executeRaw`UPDATE "User" SET role = 'MANAGER_IT' WHERE role = 'ASSISTANT_MANAGER_IT'`;

@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 
 // GET: Return list of IT Support agent names from schedule
-export async function GET() {
+export async function GET(request: Request) {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json([], { status: 401 });
 
