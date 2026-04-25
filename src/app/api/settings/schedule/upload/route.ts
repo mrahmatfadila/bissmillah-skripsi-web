@@ -112,20 +112,22 @@ export async function POST(req: Request) {
 
         // Upsert each schedule entry
         for (const s of schedules) {
-            const now = new Date();
-            await prisma.$executeRaw`
-                INSERT INTO "ShiftSchedule" ("id", "date", "shift", "agentName", "createdAt", "updatedAt")
-                VALUES (
-                    ${'sch_' + s.date.getTime() + '_' + s.shift},
-                    ${s.date},
-                    ${s.shift},
-                    ${s.agentName},
-                    ${now},
-                    ${now}
-                )
-                ON CONFLICT ("date", "shift")
-                DO UPDATE SET "agentName" = EXCLUDED."agentName", "updatedAt" = EXCLUDED."updatedAt"
-            `;
+            await prisma.shiftSchedule.upsert({
+                where: {
+                    date_shift: {
+                        date: s.date,
+                        shift: s.shift
+                    }
+                },
+                update: {
+                    agentName: s.agentName,
+                },
+                create: {
+                    date: s.date,
+                    shift: s.shift,
+                    agentName: s.agentName,
+                }
+            });
         }
 
         return NextResponse.json({

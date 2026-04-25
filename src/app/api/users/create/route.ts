@@ -12,7 +12,7 @@ export async function POST(request: Request) {
         const session = await getServerSession(authOptions);
 
         // Only Super Admin can create users
-        if (!session || session.user.role !== 'SUPER_ADMIN') {
+        if (!session || session.user.role !== 'IT_SUPPORT') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
                 password: hashedPassword,
                 role,
                 department: department || null,
-                location: location || 'Kantor Jakarta',
+                location: location || 'Terminal 2',
             },
             select: {
                 id: true,

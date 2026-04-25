@@ -8,24 +8,24 @@ datasource db {
 }
 
 model User {
-  id              String          @id @default(cuid())
-  nik             String?         @unique
-  name            String?
-  email           String?         @unique
-  password        String
-  role            Role            @default(STAFF)
-  department      String?
-  location        String?         @default("Kantor Jakarta")
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  image           String?
-  comments        Comment[]
-  articles        KnowledgeBase[]
-  notifications   Notification[]
-  ticketsAssigned Ticket[]        @relation("TicketAssignee")
-  ticketsCreated  Ticket[]        @relation("TicketCreator")
-  failedLoginAttempts Int         @default(0)
+  id                  String          @id @default(cuid())
+  nik                 String?         @unique
+  name                String?
+  email               String?         @unique
+  password            String
+  role                Role            @default(SUPERVISOR_SHOP)
+  department          String?
+  location            String?         @default("Kantor Jakarta")
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  image               String?
+  failedLoginAttempts Int             @default(0)
   lockedUntil         DateTime?
+  comments            Comment[]
+  articles            KnowledgeBase[]
+  notifications       Notification[]
+  ticketsAssigned     Ticket[]        @relation("TicketAssignee")
+  ticketsCreated      Ticket[]        @relation("TicketCreator")
 }
 
 model Ticket {
@@ -104,14 +104,43 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id])
 }
 
+model ShiftSchedule {
+  id        String   @id @default(cuid())
+  date      DateTime
+  shift     String
+  agentName String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, shift])
+}
+
+model ShiftSwapRequest {
+  id             String    @id @default(cuid())
+  requesterName  String
+  requesterShift String
+  requesterDate  DateTime
+  targetName     String
+  targetShift    String
+  targetDate     DateTime
+  reason         String?
+  status         String    @default("PENDING")
+  approvedBy     String?
+  approvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model SystemSetting {
+  id        String   @id @default("singleton")
+  data      String
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+
 enum Role {
-  SUPER_ADMIN
   IT_SUPPORT
-  MANAGER
-  SUPERVISOR
-  FINANCE
-  STAFF
-  SECURITY
+  SUPERVISOR_SHOP
 }
 
 enum TicketStatus {
@@ -129,38 +158,3 @@ enum TicketPriority {
   HIGH
   CRITICAL
 }
-
-model ShiftSchedule {
-  id        String   @id @default(cuid())
-  date      DateTime
-  shift     String   // "PAGI", "SIANG", "MALAM"
-  agentName String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([date, shift])
-}
-
-model ShiftSwapRequest {
-  id              String   @id @default(cuid())
-  requesterName   String   // Person who wants to swap
-  requesterShift  String   // Their original shift (PAGI/SIANG/MALAM)
-  requesterDate   DateTime // Date of their original shift
-  targetName      String   // Person they want to swap with
-  targetShift     String   // Target's original shift
-  targetDate      DateTime // Date of target's shift
-  reason          String?
-  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  approvedBy      String?
-  approvedAt      DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-
-model SystemSetting {
-  id        String   @id @default("singleton")
-  data      String   // JSON string of all settings
-  updatedAt DateTime @updatedAt
-  updatedBy String?
-}
-

@@ -75,16 +75,19 @@ export async function GET(request: Request) {
             const { shift, date } = activeShifts[i];
             const endOfDay = new Date(date.getTime() + 86400000);
 
-            const rows = await prisma.$queryRaw<any[]>`
-                SELECT * FROM "ShiftSchedule"
-                WHERE "date" >= ${date} AND "date" < ${endOfDay}
-                AND "shift" = ${shift}
-                LIMIT 1
-            `;
+            const shiftData = await prisma.shiftSchedule.findFirst({
+                where: {
+                    date: {
+                        gte: date,
+                        lt: endOfDay
+                    },
+                    shift: shift
+                }
+            });
 
-            if (rows && rows.length > 0) {
+            if (shiftData) {
                 return NextResponse.json({
-                    ...rows[0],
+                    ...shiftData,
                     shiftLabel: SHIFT_LABEL[shift] ?? shift,
                     activeShiftName: shift,
                     noScheduleUploaded: false,

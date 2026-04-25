@@ -18,10 +18,10 @@ export async function GET(request: Request) {
         }
 
         // Only Super Admin can access
-        if (!session || session.user.role !== 'SUPER_ADMIN') {
+        if (!session || session.user.role !== 'IT_SUPPORT') {
             console.log(`Unauthorized access attempt. Current role: ${session?.user?.role}`);
             return NextResponse.json({
-                error: `Unauthorized: You must be SUPER_ADMIN. Your current role is: ${session?.user?.role || 'None'}`
+                error: `Unauthorized: You must be IT_SUPPORT. Your current role is: ${session?.user?.role || 'None'}`
             }, { status: 403 });
         }
 

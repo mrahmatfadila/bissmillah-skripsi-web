@@ -16,7 +16,7 @@ export async function GET(request: Request) {
         }
 
         // Allow Managers, IT Support, Super Admin to see list of technicians
-        const allowedRoles = ['SUPER_ADMIN', 'MANAGER', 'MANAGER_IT', 'IT_SUPPORT', 'SUPERVISOR'];
+        const allowedRoles = ['IT_SUPPORT', 'SUPERVISOR_SHOP'];
         if (!allowedRoles.includes(session.user.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
@@ -24,6 +24,9 @@ export async function GET(request: Request) {
         const technicians = await prisma.user.findMany({
             where: {
                 role: 'IT_SUPPORT',
+                nik: {
+                    not: 'admin' // Exclude administrator account from assignee dropdown
+                }
             },
             select: {
                 id: true,

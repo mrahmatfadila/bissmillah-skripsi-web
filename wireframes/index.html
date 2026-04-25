@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframes - IT Ticketing Support</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #525252; }
+        .wireframe-box { background-color: #d4d4d4; }
+        .sidebar { background-color: #e5e5e5; border-right: 1px solid #9ca3af; }
+        .main-bg { background-color: #e5e5e5; }
+        .header { background-color: #ffffff; border-bottom: 1px solid #9ca3af; }
+        .ticket-card { background-color: #ffffff; border: 1px solid #525252; border-radius: 8px; }
+        
+        .menu-item { padding: 8px 12px; display: flex; align-items: center; gap: 12px; color: #171717; margin-bottom: 4px; border-radius: 4px; }
+        .menu-item.active { background-color: #525252; color: white; }
+        .menu-item.active .icon-box { background-color: #e5e5e5; }
+        
+        .icon-box { width: 16px; height: 16px; background-color: #a3a3a3; border-radius: 2px; }
+        .icon-circle { width: 12px; height: 12px; background-color: #a3a3a3; border-radius: 50%; }
+        
+        .section-title { font-size: 13px; text-transform: uppercase; color: #404040; margin: 16px 12px 8px; font-weight: 500; }
+        
+        .sidebar-scroll { overflow-y: auto; }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: #a3a3a3; border-radius: 2px; }
+        
+        .line-long { height: 2px; width: 350px; background-color: #a3a3a3; margin-bottom: 8px; }
+        .line-short { height: 2px; width: 400px; background-color: #a3a3a3; margin-bottom: 2px; }
+        
+        .badge-pill { font-size: 10px; font-weight: 700; background-color: #d4d4d4; padding: 4px 12px; border-radius: 9999px; color: #171717; letter-spacing: 0.05em; }
+    </style>
+</head>
+<body class="p-8 flex flex-col gap-12 items-center">
+
+    <div class="bg-white p-6 rounded text-center shadow-lg w-full max-w-4xl">
+        <h1 class="text-2xl font-bold mb-4">Pilih dan Download Wireframe (Format PNG)</h1>
+        <div class="flex items-center justify-center gap-4">
+            <button onclick="downloadWireframe('wireframe-it', 'wireframe-it-support.png')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow">
+                Download IT Support
+            </button>
+            <button onclick="downloadWireframe('wireframe-spv', 'wireframe-spv-shop.png')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow">
+                Download Supervisor Shop
+            </button>
+        </div>
+        <p class="text-sm text-gray-500 mt-4">Jika sudah persis dengan gambar contoh, klik tombol di atas untuk download gambar PNG.</p>
+    </div>
+
+    <!-- WIREFRAME: IT SUPPORT -->
+    <div id="wireframe-it" class="w-[1280px] h-[932px] flex border border-gray-300 shadow-none relative overflow-hidden bg-white">
+        <!-- SIDEBAR -->
+        <div class="w-[280px] h-full sidebar flex flex-col flex-shrink-0 z-10 relative">
+            <div class="p-6 flex items-center gap-4 border-b border-gray-300">
+                <div class="w-12 h-8 wireframe-box"></div>
+                <div class="px-3 py-1 bg-gray-300 text-sm font-semibold text-gray-800">ROLE</div>
+            </div>
+            <div class="flex-1 px-2 py-4 text-[15px] font-medium sidebar-scroll">
+                <div class="menu-item"><div class="icon-box"></div><span>Dashboard</span></div>
+
+                <div class="section-title">TIKET</div>
+                <div class="menu-item"><div class="icon-box"></div><span>Belum ditugaskan</span></div>
+                <div class="menu-item"><div class="icon-box"></div><span>Tiket Saya</span></div>
+                <div class="menu-item"><div class="icon-box"></div><span>Tugas Saya</span></div>
+                <div class="menu-item"><div class="icon-box"></div><span>Spam</span></div>
+
+                <div class="section-title">STATUS</div>
+                <div class="menu-item"><div class="icon-circle"></div><span>Terbuka</span></div>
+                <div class="menu-item"><div class="icon-circle"></div><span>Diproses</span></div>
+                <div class="menu-item"><div class="icon-circle"></div><span>Tertunda</span></div>
+                <div class="menu-item"><div class="icon-circle"></div><span>Selesai</span></div>
+                <div class="menu-item"><div class="icon-circle"></div><span>Ditutup</span></div>
+                <div class="menu-item"><div class="icon-circle"></div><span>Dibatalkan</span></div>
+
+                <div class="section-title">DEPARTEMEN</div>
+                <div class="menu-item"><div class="icon-circle" style="background-color: transparent"></div><span>Umum</span></div>
+                <div class="menu-item active"><div class="icon-box" style="background-color: transparent"></div><span>IT Support MIS</span></div>
+                <div class="menu-item"><div class="icon-box" style="background-color: transparent"></div><span>Toko & Retail</span></div>
+                <div class="menu-item"><div class="icon-box" style="background-color: transparent"></div><span>Keuangan</span></div>
+                <div class="menu-item"><div class="icon-box" style="background-color: transparent"></div><span>Keamanan</span></div>
+
+                <div class="section-title">SUMBER DAYA</div>
+                <div class="menu-item"><div class="icon-box"></div><span>Knowledge Base</span></div>
+
+                <div class="section-title">JADWAL KERJA</div>
+                <div class="menu-item"><div class="icon-box"></div><span>Kalender Shift</span></div>
+                <div class="menu-item"><div class="icon-box"></div><span>Tukar Shift</span></div>
+                <div class="menu-item"><div class="icon-box"></div><span>Upload Jadwal PDF</span></div>
+
+                <div class="section-title">Analitik</div>
+                <div class="menu-item"><div class="icon-box"></div><span>Laporan Analitik</span></div>
+
+                <div class="section-title">Admin IT Support</div>
+                <div class="menu-item"><div class="icon-box"></div><span>Konfigurasi AHP</span></div>
+                <div class="menu-item"><div class="icon-box"></div><span>Simulasi Perhitungan AHP</span></div>
+                <div class="menu-item"><div class="icon-box"></div><span>Manajemen User</span></div>
+                <div class="menu-item"><div class="icon-box"></div><span>Pengaturan Sistem</span></div>
+
+                <div class="section-title">Akun</div>
+                <div class="menu-item"><div class="icon-box"></div><span>Pengaturan Profil</span></div>
+            </div>
+            
+            <div class="p-6 border-t border-gray-400">
+                <div class="w-full flex justify-center text-sm font-bold text-black border-t border-b py-2 border-gray-400">
+                    Keluar
+                </div>
+            </div>
+        </div>
+        <!-- MAIN CONTENT -->
+        <div class="flex-1 flex flex-col main-bg">
+            <div class="h-[72px] header flex items-center justify-between px-8">
+                <div class="w-[420px] h-10 border border-gray-500 rounded-md flex items-center px-4 bg-white">
+                    <div class="w-4 h-4 bg-gray-300 mr-4"></div>
+                    <div class="text-gray-800 text-[15px]">Search...</div>
+                </div>
+                <div class="flex items-center gap-5">
+                    <div class="w-7 h-7 bg-gray-300"></div>
+                    <div class="w-7 h-7 bg-gray-300"></div>
+                    <div class="w-7 h-7 bg-gray-300"></div>
+                    <div class="w-7 h-7 bg-gray-300"></div>
+                    <div class="h-8 w-px bg-gray-400 mx-2"></div>
+                    <div class="text-right">
+                        <div class="text-sm font-bold text-gray-800">NAMA</div>
+                        <div class="text-[11px] text-gray-600 font-bold uppercase">ROLE</div>
+                    </div>
+                    <div class="w-12 h-12 bg-gray-300 rounded-full"></div>
+                </div>
+            </div>
+            
+            <div class="h-8 bg-gray-400 flex items-center justify-center">
+                <div class="bg-gray-200 px-6 py-1 text-[10px] font-bold rounded-full text-black">■ ■ On-Duty Siang (13:30-22:30): M Rahmat Fadila</div>
+            </div>
+            
+            <div class="p-10 flex-1">
+                <h2 class="text-3xl font-bold text-black mb-8">Tiket it support</h2>
+                <div class="bg-white p-8 rounded-lg shadow-sm border border-transparent min-h-[600px]">
+                    <div class="text-[15px] font-bold mb-6 text-black">Tiket (6)</div>
+                    <div class="space-y-4">
+                        <div class="ticket-card p-5 px-6 flex justify-between items-center">
+                            <div><div class="line-long"></div><div class="line-short"></div></div>  
+                            <div class="badge-pill">IN_PROGRESS</div>
+                        </div>
+                        <div class="ticket-card p-5 px-6 flex justify-between items-center">
+                            <div><div class="line-long"></div><div class="line-short"></div></div>  
+                            <div class="badge-pill">OPEN</div>
+                        </div>
+                        <div class="ticket-card p-5 px-6 flex justify-between items-center">
+                            <div><div class="line-long"></div><div class="line-short"></div></div>  
+                            <div class="badge-pill">CANCELLED</div>
+                        </div>
+                        <div class="ticket-card p-5 px-6 flex justify-between items-center">
+                            <div><div class="line-long"></div><div class="line-short"></div></div>  
+                            <div class="badge-pill">PENDING</div>
+                        </div>
+                        <div class="ticket-card p-5 px-6 flex justify-between items-center">
+                            <div><div class="line-long"></div><div class="line-short"></div></div>  
+                            <div class="badge-pill">PENDING</div>
+                        </div>
+                        <div class="ticket-card p-5 px-6 flex justify-between items-center">
+                            <div><div class="line-long"></div><div class="line-short"></div></div>  
+                            <div class="badge-pill">RESOLVED</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WIREFRAME: SUPERVISOR SHOP -->
+    <div id="wireframe-spv" class="w-[1280px] h-[932px] flex border border-gray-300 shadow-none relative overflow-hidden bg-white mt-12">
+        <!-- SIDEBAR -->
+        <div class="w-[280px] h-full sidebar flex flex-col flex-shrink-0 z-10 relative">
+            <div class="p-6 flex items-center gap-4 border-b border-gray-300">
+                <div class="w-12 h-8 wireframe-box"></div>
+                <div class="px-3 py-1 bg-gray-300 text-sm font-semibold text-gray-800">ROLE</div>
+            </div>
+            <div class="flex-1 px-2 py-4 text-[15px] font-medium sidebar-scroll">
+                <div class="section-title">TIKET</div>
+                <div class="menu-item active"><div class="icon-box" style="background-color: transparent"></div><span>Tiket Saya</span></div>
+
+                <div class="section-title">SUMBER DAYA</div>
+                <div class="menu-item"><div class="icon-box"></div><span>Knowledge Base</span></div>
+
+                <div class="section-title">AKUN</div>
+                <div class="menu-item"><div class="icon-box"></div><span>Pengaturan Profil</span></div>
+            </div>
+            
+            <div class="p-6 border-t border-gray-400">
+                <div class="w-full flex justify-center text-sm font-bold text-black border-t border-b py-2 border-gray-400">
+                    Keluar
+                </div>
+            </div>
+        </div>
+        <!-- MAIN CONTENT -->
+        <div class="flex-1 flex flex-col main-bg">
+            <div class="h-[72px] header flex items-center justify-between px-8">
+                <div class="w-[420px] h-10 border border-gray-500 rounded-md flex items-center px-4 bg-white">
+                    <div class="w-4 h-4 bg-gray-300 mr-4"></div>
+                    <div class="text-gray-800 text-[15px]">Search...</div>
+                </div>
+                <div class="flex items-center gap-5">
+                    <div class="w-7 h-7 bg-gray-300"></div>
+                    <div class="w-7 h-7 bg-gray-300"></div>
+                    <div class="w-7 h-7 bg-gray-300"></div>
+                    <div class="w-7 h-7 bg-gray-300"></div>
+                    <div class="h-8 w-px bg-gray-400 mx-2"></div>
+                    <div class="text-right">
+                        <div class="text-sm font-bold text-gray-800">NAMA</div>
+                        <div class="text-[11px] text-gray-600 font-bold uppercase">ROLE</div>
+                    </div>
+                    <div class="w-12 h-12 bg-gray-300 rounded-full"></div>
+                </div>
+            </div>
+            
+            <div class="h-8 bg-gray-400 flex items-center justify-center">
+            </div>
+            
+            <div class="p-10 flex-1">
+                <h2 class="text-3xl font-bold text-black mb-8">Tiket supervisor shop</h2>
+                <div class="bg-white p-8 rounded-lg shadow-sm border border-transparent min-h-[600px]">
+                    <div class="text-[15px] font-bold mb-6 text-black">Tiket (6)</div>
+                    <div class="space-y-4">
+                        <div class="ticket-card p-5 px-6 flex justify-between items-center">
+                            <div><div class="line-long"></div><div class="line-short"></div></div>  
+                            <div class="badge-pill">IN_PROGRESS</div>
+                        </div>
+                        <div class="ticket-card p-5 px-6 flex justify-between items-center">
+                            <div><div class="line-long"></div><div class="line-short"></div></div>  
+                            <div class="badge-pill">OPEN</div>
+                        </div>
+                        <div class="ticket-card p-5 px-6 flex justify-between items-center">
+                            <div><div class="line-long"></div><div class="line-short"></div></div>  
+                            <div class="badge-pill">CANCELLED</div>
+                        </div>
+                        <div class="ticket-card p-5 px-6 flex justify-between items-center">
+                            <div><div class="line-long"></div><div class="line-short"></div></div>  
+                            <div class="badge-pill">PENDING</div>
+                        </div>
+                        <div class="ticket-card p-5 px-6 flex justify-between items-center">
+                            <div><div class="line-long"></div><div class="line-short"></div></div>  
+                            <div class="badge-pill">PENDING</div>
+                        </div>
+                        <div class="ticket-card p-5 px-6 flex justify-between items-center">
+                            <div><div class="line-long"></div><div class="line-short"></div></div>  
+                            <div class="badge-pill">RESOLVED</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function downloadWireframe(elementId, filename) {
+            const element = document.getElementById(elementId);
+            const originalScroll = element.style.overflow;
+            element.style.overflow = "visible"; 
+            
+            html2canvas(element, { 
+                scale: 2, 
+                backgroundColor: "#ffffff",
+                windowWidth: element.scrollWidth,
+                windowHeight: element.scrollHeight
+            }).then(canvas => {
+                element.style.overflow = originalScroll;
+                
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>

@@ -49,27 +49,16 @@ interface User {
 }
 
 const ROLES = [
-    { value: "SUPER_ADMIN", label: "Super Admin" },
     { value: "IT_SUPPORT", label: "IT Support" },
-    { value: "MANAGER", label: "Manager" },
-    { value: "SUPERVISOR", label: "Supervisor" },
-    { value: "FINANCE", label: "Finance" },
-    { value: "STAFF", label: "Staff" },
-    { value: "SECURITY", label: "Security" },
+    { value: "SUPERVISOR_SHOP", label: "Supervisor Shop" },
 ];
 
 const DEPARTMENTS = [
-    "IT Support MIS",
-    "Shop Operations",
-    "Finance",
-    "Security",
-    "General",
+    "IT Support",
+    "Shop Operasional",
 ];
 
 const LOCATIONS = [
-    "Kantor Jakarta",
-    "Kantor Bali",
-    "Kantor Pavilion",
     "Terminal 2",
     "Terminal 3",
     "Terminal 2 & 3",
@@ -93,13 +82,13 @@ export default function UserManagementPage() {
         password: "",
         role: "",
         department: "",
-        location: "Kantor Jakarta",
+        location: "Terminal 2",
     });
     const [submitting, setSubmitting] = useState(false);
 
     // Check authorization
     useEffect(() => {
-        if (session && session.user.role !== 'SUPER_ADMIN') {
+        if (session && session.user.role !== 'IT_SUPPORT') {
             router.push('/dashboard');
         }
     }, [session, router]);
@@ -260,7 +249,7 @@ export default function UserManagementPage() {
             password: "", // Don't populate password
             role: user.role,
             department: user.department || "",
-            location: user.location || "Kantor Jakarta",
+            location: user.location || "Terminal 2",
         });
         setIsEditDialogOpen(true);
     };
@@ -278,14 +267,14 @@ export default function UserManagementPage() {
             password: "",
             role: "",
             department: "",
-            location: "Kantor Jakarta",
+            location: "Terminal 2",
         });
         setSelectedUser(null);
     };
 
 
 
-    if (!session || session.user.role !== 'SUPER_ADMIN') {
+    if (!session || session.user.role !== 'IT_SUPPORT') {
         return null;
     }
 
@@ -407,7 +396,7 @@ export default function UserManagementPage() {
                                                                     >
                                                                         <Edit className="w-4 h-4 text-muted-foreground" />
                                                                     </Button>
-                                                                    {session.user.role === 'SUPER_ADMIN' && user.id !== session.user.id && (
+                                                                    {session.user.role === 'IT_SUPPORT' && user.id !== session.user.id && (
                                                                         <Button
                                                                             variant="ghost"
                                                                             size="sm"

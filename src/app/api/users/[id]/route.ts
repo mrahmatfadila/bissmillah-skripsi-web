@@ -16,7 +16,7 @@ export async function PUT(
         const session = await getServerSession(authOptions);
 
         // Only Super Admin can update users
-        if (!session || session.user.role !== 'SUPER_ADMIN') {
+        if (!session || session.user.role !== 'IT_SUPPORT') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
@@ -30,7 +30,7 @@ export async function PUT(
             email: email || null,
             role,
             department: department || null,
-            location: location || 'Kantor Jakarta',
+            location: location || 'Terminal 2',
         };
 
         // Only update password if provided
@@ -70,7 +70,7 @@ export async function DELETE(
         const session = await getServerSession(authOptions);
 
         // Only Super Admin can delete users
-        if (!session || session.user.role !== 'SUPER_ADMIN') {
+        if (!session || session.user.role !== 'IT_SUPPORT') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 

@@ -5,9 +5,6 @@ import { prisma } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 
-
-
-
 export async function GET(req: Request) {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -20,13 +17,21 @@ export async function GET(req: Request) {
     const endDate = new Date(Date.UTC(year, month, 1)); // Exclusive
 
     try {
-        const rows = await prisma.$queryRaw<{ id: string; date: Date; shift: string; agentName: string }[]>`
-            SELECT "id", "date", "shift", "agentName"
-            FROM "ShiftSchedule"
-            WHERE "date" >= ${startDate} AND "date" < ${endDate}
-            ORDER BY "date" ASC, 
-            CASE "shift" WHEN 'PAGI' THEN 1 WHEN 'SIANG' THEN 2 WHEN 'MALAM' THEN 3 END
-        `;
+        const shifts = await prisma.shiftSchedule.findMany({
+            where: {
+                date: {
+                    gte: startDate,
+                    lt: endDate
+                }
+            },
+            select: { id: true, date: true, shift: true, agentName: true }
+        });
+
+        const shiftOrder: Record<string, number> = { 'PAGI': 1, 'SIANG': 2, 'MALAM': 3 };
+        const rows = shifts.sort((a, b) => {
+            if (a.date.getTime() !== b.date.getTime()) return a.date.getTime() - b.date.getTime();
+            return (shiftOrder[a.shift] || 99) - (shiftOrder[b.shift] || 99);
+        });
 
         return NextResponse.json(rows);
     } catch (error: any) {

@@ -5,7 +5,6 @@ import { prisma } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 
-
 // PATCH - Approve or Reject swap
 export async function PATCH(
     req: Request,
@@ -20,16 +19,13 @@ export async function PATCH(
         const { action } = await req.json();
         const { id } = await props.params;
 
-        // Fetch swap request via raw SQL
-        const rows = await prisma.$queryRaw<any[]>`
-            SELECT * FROM "ShiftSwapRequest" WHERE "id" = ${id} LIMIT 1
-        `;
+        const swapReq = await prisma.shiftSwapRequest.findUnique({
+            where: { id: id }
+        });
 
-        if (!rows || rows.length === 0) {
+        if (!swapReq) {
             return NextResponse.json({ error: "Data tidak ditemukan" }, { status: 404 });
         }
-
-        const swapReq = rows[0];
 
         if (swapReq.status !== "PENDING") {
             return NextResponse.json({ error: "Permintaan ini sudah diproses sebelumnya" }, { status: 400 });
@@ -39,7 +35,6 @@ export async function PATCH(
         const now = new Date();
 
         if (action === "APPROVED") {
-            // Perform the actual schedule swap
             const startOfRequesterDate = new Date(swapReq.requesterDate);
             startOfRequesterDate.setHours(0, 0, 0, 0);
             const endOfRequesterDate = new Date(startOfRequesterDate.getTime() + 86400000);
@@ -49,38 +44,56 @@ export async function PATCH(
             const endOfTargetDate = new Date(startOfTargetDate.getTime() + 86400000);
 
             // Swap agent names in ShiftSchedule
-            await prisma.$executeRaw`
-                UPDATE "ShiftSchedule"
-                SET "agentName" = ${swapReq.targetName}, "updatedAt" = ${now}
-                WHERE "date" >= ${startOfRequesterDate} AND "date" < ${endOfRequesterDate}
-                AND "shift" = ${swapReq.requesterShift}
-                AND "agentName" = ${swapReq.requesterName}
-            `;
+            await prisma.shiftSchedule.updateMany({
+                where: {
+                    date: {
+                        gte: startOfRequesterDate,
+                        lt: endOfRequesterDate
+                    },
+                    shift: swapReq.requesterShift,
+                    agentName: swapReq.requesterName
+                },
+                data: {
+                    agentName: swapReq.targetName
+                }
+            });
 
-            await prisma.$executeRaw`
-                UPDATE "ShiftSchedule"
-                SET "agentName" = ${swapReq.requesterName}, "updatedAt" = ${now}
-                WHERE "date" >= ${startOfTargetDate} AND "date" < ${endOfTargetDate}
-                AND "shift" = ${swapReq.targetShift}
-                AND "agentName" = ${swapReq.targetName}
-            `;
+            await prisma.shiftSchedule.updateMany({
+                where: {
+                    date: {
+                        gte: startOfTargetDate,
+                        lt: endOfTargetDate
+                    },
+                    shift: swapReq.targetShift,
+                    agentName: swapReq.targetName
+                },
+                data: {
+                    agentName: swapReq.requesterName
+                }
+            });
 
             // Update swap request status to APPROVED
-            await prisma.$executeRaw`
-                UPDATE "ShiftSwapRequest"
-                SET "status" = 'APPROVED', "approvedBy" = ${approvedBy}, "approvedAt" = ${now}, "updatedAt" = ${now}
-                WHERE "id" = ${id}
-            `;
+            await prisma.shiftSwapRequest.update({
+                where: { id: id },
+                data: {
+                    status: 'APPROVED',
+                    approvedBy: approvedBy,
+                    approvedAt: now
+                }
+            });
 
             return NextResponse.json({ message: "✅ Tukar shift disetujui! Jadwal telah diperbarui otomatis." });
         }
 
         if (action === "REJECTED") {
-            await prisma.$executeRaw`
-                UPDATE "ShiftSwapRequest"
-                SET "status" = 'REJECTED', "approvedBy" = ${approvedBy}, "approvedAt" = ${now}, "updatedAt" = ${now}
-                WHERE "id" = ${id}
-            `;
+            await prisma.shiftSwapRequest.update({
+                where: { id: id },
+                data: {
+                    status: 'REJECTED',
+                    approvedBy: approvedBy,
+                    approvedAt: now
+                }
+            });
             return NextResponse.json({ message: "Permintaan tukar shift ditolak." });
         }
 

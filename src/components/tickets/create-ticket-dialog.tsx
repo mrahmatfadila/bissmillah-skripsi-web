@@ -21,11 +21,7 @@ interface CreateTicketDialogProps {
 
 const DEPARTMENTS = [
     { value: "IT_SUPPORT", label: "IT Support" },
-    { value: "SECURITY", label: "Security" },
-    { value: "FINANCE", label: "Finance" },
-    { value: "GENERAL", label: "General" },
-    { value: "EDC", label: "EDC (Finance)" },
-    { value: "CCTV", label: "CCTV (Security)" }
+    { value: "SHOP_OPERATIONS", label: "Shop Operasional" }
 ];
 
 const PRIORITIES = [
@@ -187,161 +183,251 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
-                <DialogHeader>
-                    <DialogTitle>Buat Tiket Baru</DialogTitle>
-                    <DialogDescription>
-                        Laporkan masalah baru atau permintaan
+            <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden border-none shadow-2xl rounded-2xl max-h-[90vh] flex flex-col">
+                <DialogHeader className="shrink-0 p-6 pb-4 border-b border-border/50 bg-slate-50/80 dark:bg-slate-900/50">
+                    <DialogTitle className="flex items-center gap-2 text-xl text-slate-800 dark:text-slate-100">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-xl mr-1">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                            </svg>
+                        </div>
+                        Buat Tiket Permintaan
+                    </DialogTitle>
+                    <DialogDescription className="text-sm pt-1">
+                        Jelaskan masalah Anda selengkap mungkin agar tim IT dapat mendiagnosis dengan cepat.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 py-4 overflow-y-auto max-h-[calc(90vh-180px)]">
-                    <div className="space-y-2">
-                        <Label htmlFor="title">Judul</Label>
-                        <Input
-                            id="title"
-                            placeholder="Mis: Printer tidak bisa connect"
-                            value={formData.title}
-                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        />
-                    </div>
 
-                    {/* Category Field */}
-                    {(isSupervisor || settings?.ticket?.requireCategory) && (
-                        <div className="space-y-2">
-                            <Label htmlFor="category">Kategori</Label>
-                            <Select
-                                value={formData.category}
-                                onValueChange={(value) => setFormData({ ...formData, category: value })}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Pilih Kategori" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {DEPARTMENTS.map((dept) => (
-                                        <SelectItem key={dept.value} value={dept.value}>
-                                            {dept.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    )}
-
-                    {(settings?.ticket?.requirePriority) && (
-                        <div className="space-y-2">
-                            <Label htmlFor="priority">Prioritas</Label>
-                            <Select
-                                value={formData.priority}
-                                onValueChange={(value) => setFormData({ ...formData, priority: value })}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Pilih Prioritas" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {PRIORITIES.map((p) => (
-                                        <SelectItem key={p.value} value={p.value}>
-                                            {p.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    )}
-
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Deskripsi</Label>
-                        <Textarea
-                            id="description"
-                            className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            placeholder="Jelaskan masalahnya secara detail..."
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        />
-                    </div>
-
-                    {/* Image Upload */}
-                    <div className="space-y-2">
-                        <Label htmlFor="images">Lampiran (Maks {settings?.ticket?.maxAttachmentSize || 5}MB)</Label>
-                        <div className="flex items-center gap-2">
+                <div className="flex-1 p-6 overflow-y-auto custom-scrollbar bg-white dark:bg-card">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-2 md:col-span-2">
+                            <Label htmlFor="title" className="text-slate-700 dark:text-slate-300 font-semibold">Judul Masalah</Label>
                             <Input
-                                id="images"
-                                type="file"
-                                accept={settings?.ticket?.allowedFileTypes?.split(',').map((t: string) => `.${t.trim()}`).join(',') || "image/*"}
-                                multiple
-                                onChange={handleImageUpload}
-                                disabled={uploading}
-                                className="cursor-pointer"
+                                id="title"
+                                placeholder="Misal: Printer lantai 2 tidak bisa connect ke laptop"
+                                value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                className="h-11 rounded-xl focus-visible:ring-blue-500 shadow-sm"
                             />
-                            {uploading && <Loader2 className="w-4 h-4 mr-2 animate-spin text-blue-600" />}
                         </div>
 
-                        {/* Image Previews */}
-                        {uploadedImages.length > 0 && (
-                            <div className="grid grid-cols-3 gap-2 mt-2">
-                                {uploadedImages.map((url, index) => (
-                                    <div key={index} className="relative group">
-                                        <img
-                                            src={url}
-                                            alt={`Preview ${index + 1}`}
-                                            className="w-full h-24 object-cover rounded-lg border-2 border-border"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => removeImage(url)}
-                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                        >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
+                        {/* Category Field */}
+                        {(isSupervisor || settings?.ticket?.requireCategory) && (
+                            <div className="space-y-2">
+                                <Label htmlFor="category" className="text-slate-700 dark:text-slate-300 font-semibold">Kategori Departemen</Label>
+                                <Select
+                                    value={formData.category}
+                                    onValueChange={(value) => setFormData({ ...formData, category: value })}
+                                >
+                                    <SelectTrigger className="h-11 rounded-xl shadow-sm">
+                                        <SelectValue placeholder="Pilih Kategori" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {DEPARTMENTS.map((dept) => (
+                                            <SelectItem key={dept.value} value={dept.value}>
+                                                {dept.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+
+                        {(settings?.ticket?.requirePriority && ahpCriteria.length === 0) && (
+                            <div className="space-y-2">
+                                <Label htmlFor="priority" className="text-slate-700 dark:text-slate-300 font-semibold">Prioritas (Manual)</Label>
+                                <Select
+                                    value={formData.priority}
+                                    onValueChange={(value) => setFormData({ ...formData, priority: value })}
+                                >
+                                    <SelectTrigger className="h-11 rounded-xl shadow-sm">
+                                        <SelectValue placeholder="Pilih Prioritas" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {PRIORITIES.map((p) => (
+                                            <SelectItem key={p.value} value={p.value}>
+                                                {p.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+
+                        <div className="space-y-2 md:col-span-2">
+                            <Label htmlFor="description" className="text-slate-700 dark:text-slate-300 font-semibold">Deskripsi Detail</Label>
+                            <Textarea
+                                id="description"
+                                className="flex min-h-[140px] w-full rounded-xl border border-input bg-background px-4 py-3 text-sm ring-offset-background placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-sm resize-none"
+                                placeholder="Ceritakan kronologi, pesan error yang muncul, atau langkah yang sudah Anda coba..."
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            />
+                        </div>
+
+                        {/* Image Upload Area */}
+                        <div className="space-y-3 md:col-span-2">
+                            <div className="flex justify-between items-center text-sm">
+                                <Label className="text-slate-700 dark:text-slate-300 font-semibold">Lampiran Bukti (Opsional)</Label>
+                                <span className="text-xs text-muted-foreground">Maks {settings?.ticket?.maxAttachmentSize || 5}MB</span>
+                            </div>
+                            
+                            <div className="relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 bg-slate-50/50 dark:bg-slate-900/20 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:border-blue-400 transition-all duration-200 text-center flex flex-col items-center justify-center group overflow-hidden">
+                                <input
+                                    type="file"
+                                    accept={settings?.ticket?.allowedFileTypes?.split(',').map((t: string) => `.${t.trim()}`).join(',') || "image/*"}
+                                    multiple
+                                    onChange={handleImageUpload}
+                                    disabled={uploading}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                    title="Klik untuk memilih file"
+                                />
+                                
+                                <div className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-slate-200 dark:border-slate-700 mb-3 group-hover:scale-110 transition-transform">
+                                    {uploading ? (
+                                        <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                                    ) : (
+                                        <svg className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                    )}
+                                </div>
+                                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    {uploading ? "Sedang Mengunggah..." : "Klik atau Seret file ke sini"}
+                                </span>
+                                <span className="text-xs text-muted-foreground mt-1">
+                                    Format yang didukung: {settings?.ticket?.allowedFileTypes?.toUpperCase() || "JPG, PNG, PDF"}
+                                </span>
+                            </div>
+
+                            {/* Image Previews */}
+                            {uploadedImages.length > 0 && (
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+                                    {uploadedImages.map((url, index) => (
+                                        <div key={index} className="relative group rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+                                            <div className="aspect-square bg-slate-100 dark:bg-slate-900">
+                                                <img
+                                                    src={url}
+                                                    alt={`Lampiran ${index + 1}`}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => { e.stopPropagation(); removeImage(url); }}
+                                                className="absolute top-1.5 right-1.5 bg-red-500/90 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 backdrop-blur-sm z-20"
+                                            >
+                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* AHP Scoring Section */}
+                        {ahpCriteria.length > 0 && (
+                            <div className="md:col-span-2 space-y-4 pt-6 mt-4 border-t border-slate-200 dark:border-slate-800">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 className="font-bold text-slate-800 dark:text-slate-100 text-base flex items-center gap-2">
+                                            Penilaian Dampak & Urgensi
+                                            <span className="text-[10px] bg-blue-100/50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800 font-bold uppercase tracking-wider">AI Priority</span>
+                                        </h4>
+                                        <p className="text-xs text-muted-foreground mt-0.5">Sistem akan secara otomatis menentukan tingkat prioritas berdasarkan kuesioner ini.</p>
                                     </div>
-                                ))}
+                                </div>
+                                
+                                {/* Live Result Preview */}
+                                {(() => {
+                                    let totalScore = 0;
+                                    let maxScore = 0;
+                                    let validWeight = 0;
+                                    
+                                    ahpCriteria.forEach(c => {
+                                        const score = ahpScores[c.name] || 1;
+                                        totalScore += c.weight * score;
+                                        validWeight += c.weight;
+                                        if (score > maxScore) maxScore = score;
+                                    });
+
+                                    if (validWeight > 0 && Math.abs(validWeight - 1) > 0.1) {
+                                        totalScore = totalScore / validWeight;
+                                    }
+
+                                    let expectedPriority = 'LOW';
+                                    if (totalScore >= 3.8) expectedPriority = 'CRITICAL';
+                                    else if (totalScore >= 2.8) expectedPriority = 'HIGH';
+                                    else if (totalScore >= 1.5) expectedPriority = 'MEDIUM';
+                                    
+                                    if (maxScore >= 5 && (expectedPriority === 'LOW' || expectedPriority === 'MEDIUM')) expectedPriority = 'HIGH';
+                                    else if (maxScore >= 4 && expectedPriority === 'LOW') expectedPriority = 'MEDIUM';
+
+                                    const priorityColors: Record<string, string> = {
+                                        'LOW': 'bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700',
+                                        'MEDIUM': 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800',
+                                        'HIGH': 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800',
+                                        'CRITICAL': 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800'
+                                    };
+
+                                    return (
+                                        <div className={`mt-2 p-4 rounded-xl border-l-[6px] border flex items-center justify-between transition-all duration-300 shadow-sm ${priorityColors[expectedPriority]}`}>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-0.5">Prediksi Prioritas</span>
+                                                <span className="text-sm font-black tracking-wide">{expectedPriority}</span>
+                                            </div>
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-0.5">Skor Kalkulasi</span>
+                                                <span className="text-lg font-black">{totalScore.toFixed(2)} / 5.00</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                                    {ahpCriteria.map((c) => (
+                                        <div key={c.name} className="space-y-3 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors hover:border-blue-300 pointer-events-auto">
+                                            <div className="flex justify-between items-center text-sm font-bold">
+                                                <Label className="text-slate-700 dark:text-slate-200 cursor-pointer">{c.name}</Label>
+                                                <span className="bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-md shadow-sm border border-slate-100 dark:border-slate-700 text-xs">Nilai: {ahpScores[c.name] || 1}</span>
+                                            </div>
+                                            <div className="relative pt-1 pb-2">
+                                                <input
+                                                    type="range"
+                                                    min="1"
+                                                    max="5"
+                                                    step="1"
+                                                    value={ahpScores[c.name] || 1}
+                                                    onChange={(e) => setAhpScores({ ...ahpScores, [c.name]: parseInt(e.target.value) })}
+                                                    className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-500/20"
+                                                />
+                                            </div>
+                                            <div className="flex justify-between text-[10px] text-muted-foreground font-semibold px-1">
+                                                <span>Sangat Rendah</span>
+                                                <span>Sangat Tinggi</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>
-
-                    {/* AHP Scoring Section */}
-                    {ahpCriteria.length > 0 && (
-                        <div className="space-y-4 border-t border-border pt-4 mt-4">
-                            <div className="flex items-center justify-between">
-                                <h4 className="font-semibold text-sm text-foreground">Penilaian Dampak & Urgensi</h4>
-                                <span className="text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full">Auto-Priority</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">Mohon nilai faktor berikut (Skala 1-5):</p>
-                            <div className="grid grid-cols-1 gap-4">
-                                {ahpCriteria.map((c) => (
-                                    <div key={c.name} className="space-y-2">
-                                        <div className="flex justify-between text-xs font-medium">
-                                            <Label className="text-foreground">{c.name}</Label>
-                                            <span className="text-blue-600 dark:text-blue-400 font-bold">{ahpScores[c.name] || 1} / 5</span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="1"
-                                            max="5"
-                                            step="1"
-                                            value={ahpScores[c.name] || 1}
-                                            onChange={(e) => setAhpScores({ ...ahpScores, [c.name]: parseInt(e.target.value) })}
-                                            className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-blue-600"
-                                        />
-                                        <div className="flex justify-between text-[10px] text-muted-foreground">
-                                            <span>Sangat Rendah</span>
-                                            <span>Sangat Tinggi</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
-                        Batal
-                    </Button>
-                    <Button onClick={handleSubmit} disabled={submitting}>
-                        {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                        Kirim Tiket
-                    </Button>
+                
+                <DialogFooter className="shrink-0 p-4 px-6 border-t border-border/50 bg-slate-50/50 dark:bg-slate-900/50 sm:justify-between items-center">
+                    <p className="text-xs text-muted-foreground hidden sm:block">Harap pastikan semua detail sudah benar.</p>
+                    <div className="flex gap-3 w-full sm:w-auto">
+                        <Button variant="outline" className="flex-1 sm:flex-none h-11 rounded-xl" onClick={() => onOpenChange(false)} disabled={submitting}>
+                            Batalkan
+                        </Button>
+                        <Button className="flex-1 sm:flex-none h-11 rounded-xl px-8 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md shadow-blue-500/20 transition-all" onClick={handleSubmit} disabled={submitting}>
+                            {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : 
+                            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>}
+                            Kirim Tiket
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

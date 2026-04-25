@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
         // Only IT Support, Manager, or Super Admin should probably touch this, adhering to strict rules: Super Admin only for settings usually.
-        if (!session || session.user.role !== 'SUPER_ADMIN') {
+        if (!session || session.user.role !== 'IT_SUPPORT') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 

@@ -39,7 +39,7 @@ export function Sidebar() {
     const pathname = usePathname();
     const { data: session } = useSession();
     const role = session?.user?.role;
-    const { hasPermission, loading: permissionsLoading } = usePermissions();
+    const { hasPermission, hasAnyPermission, loading: permissionsLoading } = usePermissions();
     const [ticketCounts, setTicketCounts] = useState({
         all: 0,
         unassigned: 0,
@@ -139,20 +139,19 @@ export function Sidebar() {
                     <div>
                         <div className="space-y-1">
                             <NavLink href="/dashboard" icon={LayoutDashboard} label="Dashboard" />
-                            {hasPermission("activity_log") && <NavLink href="/dashboard/activity" icon={FileText} label="Log Aktivitas" />}
                         </div>
                     </div>
                 )}
 
                 {/* Tickets */}
-                {hasPermission("my_tickets") && (
+                {hasAnyPermission(["unassigned_tickets", "my_tickets", "assigned_tickets", "spam_tickets"]) && (
                     <div>
                         <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Tiket</h3>
                         <div className="space-y-1">
                             {hasPermission("unassigned_tickets") && (
                                 <NavLink href="/tickets/unassigned" icon={AlertCircle} label="Belum Ditugaskan" badge={ticketCounts.unassigned > 0 ? ticketCounts.unassigned : undefined} color="bg-destructive/10 text-destructive" />
                             )}
-                            <NavLink href="/tickets/mine" icon={User} label="Tiket Saya" badge={ticketCounts.mine > 0 ? ticketCounts.mine : undefined} />
+                            {hasPermission("my_tickets") && <NavLink href="/tickets/mine" icon={User} label="Tiket Saya" badge={ticketCounts.mine > 0 ? ticketCounts.mine : undefined} />}
                             {hasPermission("assigned_tickets") && (
                                 <NavLink href="/tickets/assigned" icon={CheckSquare} label="Tugas Saya" />
                             )}
@@ -183,18 +182,8 @@ export function Sidebar() {
 
                 {/* Departments */}
                 {hasPermission("departments") && (
-                    <div>
-                        <div className="flex items-center justify-between px-3 mb-2">
-                            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Departemen</h3>
-                            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <div className="space-y-1">
-                            <NavLink href="/dashboard/dept/unspecified" icon={divDot("gray")} label="Umum" />
-                            <NavLink href="/dashboard/dept/it-support" icon={Headphones} label="IT Support MIS" />
-                            <NavLink href="/dashboard/dept/shop" icon={ShoppingBag} label="Toko & Retail" />
-                            <NavLink href="/dashboard/dept/finance" icon={CreditCard} label="Keuangan" />
-                            <NavLink href="/dashboard/dept/security" icon={Shield} label="Keamanan" />
-                        </div>
+                    <div className="space-y-1">
+                        <NavLink href="/dashboard/dept/it-shop" icon={Headphones} label="Departemen IT & Toko" />
                     </div>
                 )}
 
@@ -208,13 +197,14 @@ export function Sidebar() {
                     </div>
                 )}
 
-                {/* Jadwal Shift */}
+                {/* Jadwal Kerja */}
                 {hasPermission("shift_schedule") && (
                     <div>
                         <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Jadwal Kerja</h3>
                         <div className="space-y-1">
                             <NavLink href="/dashboard/settings/schedule/view" icon={CalendarDays} label="Kalender Shift" />
                             <NavLink href="/dashboard/settings/schedule/swap" icon={ArrowLeftRight} label="Tukar Shift" />
+                            {hasPermission("upload_schedule") && <NavLink href="/dashboard/settings/schedule" icon={Clock} label="Upload Jadwal PDF" />}
                         </div>
                     </div>
                 )}
@@ -254,14 +244,13 @@ export function Sidebar() {
                 {(hasPermission("ahp_config") || hasPermission("user_management") || hasPermission("role_management") || hasPermission("system_settings") || hasPermission("upload_schedule")) && (
                     <div>
                         <div className="flex items-center justify-between px-3 mb-2 mt-4">
-                            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Admin</h3>
+                            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Admin IT Support</h3>
                         </div>
                         <div className="space-y-1">
                             {hasPermission("ahp_config") && <NavLink href="/dashboard/settings/ahp" icon={Settings} label="Konfigurasi AHP" />}
+                            {hasPermission("ahp_config") && <NavLink href="/dashboard/settings/ahp/calculate" icon={BarChart3} label="Simulasi Perhitungan AHP" />}
                             {hasPermission("user_management") && <NavLink href="/dashboard/settings/users" icon={Users} label="Manajemen User" />}
-                            {hasPermission("role_management") && <NavLink href="/dashboard/settings/roles" icon={Shield} label="Peran & Izin" />}
                             {hasPermission("system_settings") && <NavLink href="/dashboard/settings/system" icon={Settings} label="Pengaturan Sistem" />}
-                            {hasPermission("upload_schedule") && <NavLink href="/dashboard/settings/schedule" icon={Clock} label="Upload Jadwal PDF" />}
                         </div>
                     </div>
                 )}
@@ -288,7 +277,6 @@ export function Sidebar() {
                         </div>
                         <div className="space-y-1">
                             <NavLink href="/dashboard/profile" icon={User} label="Pengaturan Profil" />
-                            <NavLink href="/dashboard/preferences" icon={Settings} label="Preferensi Akun" />
                         </div>
                     </div>
                 )}

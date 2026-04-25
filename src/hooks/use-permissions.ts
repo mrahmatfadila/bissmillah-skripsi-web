@@ -65,17 +65,14 @@ export function usePermissions() {
     }, [role]);
 
     const hasPermission = (permission: string) => {
-        if (role === 'SUPER_ADMIN') return true;
         return permissions.includes(permission);
     };
 
     const hasAnyPermission = (permissionList: string[]) => {
-        if (role === 'SUPER_ADMIN') return true;
         return permissionList.some(p => permissions.includes(p));
     };
 
     const hasAllPermissions = (permissionList: string[]) => {
-        if (role === 'SUPER_ADMIN') return true;
         return permissionList.every(p => permissions.includes(p));
     };
 

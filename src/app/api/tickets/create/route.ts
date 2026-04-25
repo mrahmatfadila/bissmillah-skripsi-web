@@ -148,7 +148,7 @@ export async function POST(request: Request) {
         });
 
         const admins = await prisma.user.findMany({
-            where: { role: { in: ['SUPER_ADMIN', 'IT_SUPPORT', 'MANAGER'] } }
+            where: { role: { in: ['IT_SUPPORT'] } }
         });
 
         if (admins.length > 0) {

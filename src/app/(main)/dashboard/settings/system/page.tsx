@@ -119,7 +119,7 @@ export default function SystemSettingsPage() {
     const [originalSettings, setOriginalSettings] = useState<SystemSettings | null>(null);
 
     useEffect(() => {
-        if (session && !["SUPER_ADMIN", "ADMIN"].includes(session.user.role)) {
+        if (session && session.user.role !== 'IT_SUPPORT') {
             router.push("/dashboard");
         }
     }, [session, router]);
@@ -213,7 +213,7 @@ export default function SystemSettingsPage() {
         }
     };
 
-    if (!session || !["SUPER_ADMIN", "ADMIN"].includes(session.user.role)) return null;
+    if (!session || session.user.role !== 'IT_SUPPORT') return null;
 
     if (loading) {
         return (
@@ -957,7 +957,7 @@ export default function SystemSettingsPage() {
                                                 <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
                                                 <div>
                                                     <p className="text-sm font-semibold text-red-800 dark:text-red-400">⚠ Mode Maintenance Sedang Aktif</p>
-                                                    <p className="text-xs text-red-600 mt-0.5">Pengguna biasa tidak dapat mengakses sistem saat ini</p>
+                                                    <p className="text-xs text-red-600 mt-0.5">Supervisor Shop tidak dapat mengakses sistem saat ini</p>
                                                 </div>
                                             </div>
                                         )}
@@ -975,8 +975,8 @@ export default function SystemSettingsPage() {
 
                                         <div className="flex items-center justify-between p-3 border rounded-lg bg-card">
                                             <div>
-                                                <Label className="text-sm font-medium">Izinkan Akses Admin</Label>
-                                                <p className="text-xs text-muted-foreground mt-0.5">Super Admin tetap bisa login saat maintenance</p>
+                                                <Label className="text-sm font-medium">Izinkan Akses IT Support</Label>
+                                                <p className="text-xs text-muted-foreground mt-0.5">IT Support tetap bisa login saat maintenance berlangsung</p>
                                             </div>
                                             <Switch
                                                 checked={settings.maintenance.allowAdminAccess}
@@ -1019,11 +1019,11 @@ export default function SystemSettingsPage() {
                                     <CardContent>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {[
-                                                { label: "Framework", value: "Next.js 14" },
+                                                { label: "Framework", value: "Next.js 16" },
                                                 { label: "Database", value: "PostgreSQL" },
                                                 { label: "ORM", value: "Prisma" },
                                                 { label: "Auth", value: "NextAuth.js" },
-                                                { label: "Node.js", value: process.version || "v18+" },
+                                                { label: "Roles", value: "IT Support, Supervisor Shop" },
                                                 { label: "Environment", value: process.env.NODE_ENV || "development" },
                                             ].map((item) => (
                                                 <div key={item.label} className="flex justify-between items-center py-2 border-b border-border/50">

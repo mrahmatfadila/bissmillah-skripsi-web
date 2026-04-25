@@ -1,241 +1,312 @@
-# Sequence Diagrams (PlantUML)
+# Sequence Diagrams (PlantUML) - Sesuai Implementasi Sistem Aktual (API)
 
-Salin kode di dalam blok code di bawah ini ke editor PlantUML (seperti PlantText atau IntelliJ IDEA Plugin).
+Berikut adalah 15 Sequence Diagram lengkap yang sudah di-scan & dicocokkan langsung dengan baris kode *backend* aktual (Next.js App Router API, Prisma, NextAuth) di sistem yang Anda gunakan saat ini:
 
-## 1. Login & Autentikasi (Auth Modul)
-Diagram ini menjelaskan proses login pengguna menggunakan kredensial (Email/Password) dan validasi role.
-
+## 1. Login (Autentikasi NextAuth)
 ```plantuml
 @startuml
-skinparam handwritten false
-skinparam monochrome false
-skinparam shadowing true
-
-actor User as "Pengguna"
+actor User as "User / IT Support"
 boundary UI as "Halaman Login"
-control Auth as "NextAuth Logic"
-database DB as "Database (User)"
+control System as "NextAuth API\n/api/auth/[...nextauth]"
+database DB as "Database"
 
-User -> UI : Buka Halaman Login
-UI -> User : Tampilkan Form Login
-User -> UI : Input Email & Password
-UI -> Auth : POST /api/auth/callback/credentials\n(email, password)
-activate Auth
-
-Auth -> DB : Query User by Email
-activate DB
-DB --> Auth : Return User Data (Hash Password)
-deactivate DB
-
-Auth -> Auth : Verifikasi Password (Bcrypt)
-
-alt Password Valid
-    Auth -> DB : Update Session / Token
-    Auth --> UI : Login Sukses (Session Created)
-    UI -> User : Redirect ke Dashboard (Sesuai Role)
-else Password Salah / User Tidak Ditemukan
-    Auth --> UI : Error: Invalid Credentials
-    UI -> User : Tampilkan Pesan Error
-end
-
-deactivate Auth
+User -> UI : Masukkan NIK & Password
+UI -> System : POST Credentials
+System -> DB : Validasi Kredensial & Role
+DB --> System : Return User
+System -> System : Enkripsi & Buat Session JWT
+System --> UI : Set Cookie & Authorize
+UI -> User : Redirect ke Dashboard
 @enduml
 ```
 
-## 2. Pembuatan Tiket dengan AHP (Create Ticket)
-Diagram ini menjelaskan alur pembuatan tiket dimana sistem otomatis menghitung prioritas menggunakan metode AHP.
-
+## 2. Logout
 ```plantuml
 @startuml
-skinparam boxPadding 10
+actor User as "User"
+boundary UI as "Tampilan Web"
+control System as "NextAuth API"
 
-actor User as "Staff / Pelapor"
+User -> UI : Klik "Keluar" (Logout)
+UI -> System : Request signOut()
+System -> System : Hapus Sesi / JWT Cookie
+System --> UI : Redirect URL
+UI -> User : Kembali ke Halaman Login
+@enduml
+```
+
+## 3. Pencarian Solusi Mandiri (Knowledge Base)
+```plantuml
+@startuml
+actor User as "User"
+boundary UI as "Menu Knowledge Base"
+control Server as "API /api/kb"
+database DB as "Database"
+
+User -> UI : Ketik kata kunci masalah
+UI -> Server : GET /api/kb?search=keyword
+Server -> DB : Find artikel relevan
+DB --> Server : List artikel
+Server --> UI : Return JSON Data
+UI -> User : Tampilkan Daftar Solusi 
+@enduml
+```
+
+## 4. Create Ticket (Manual / Standard) 
+```plantuml
+@startuml
+actor User as "User / Pelapor"
 boundary UI as "Form Buat Tiket"
-control API as "API: /api/tickets/create"
-control AHP as "AHP Calculation Logic"
-database DB as "Database"
-control WA as "WhatsApp Service"
+control Server as "API: POST /api/tickets/create"
+control WA as "WhatsAppService & EmailService"
+database DB as "Database (Prisma)"
 
-User -> UI : Isi Judul, Deskripsi & Kriteria AHP
-UI -> API : POST /api/tickets/create\n(Data Tiket + Skor AHP)
-activate API
+User -> UI : Isi Judul, Deskripsi, Kategori & Prioritas
+UI -> Server : POST JSON (Data + Manual Priority)
+Server -> DB : Cek Pengaturan Sistem (AutoAssign dll)
 
-API -> API : Cek Session (Auth)
-
-group Proses Hitung Prioritas (AHP)
-    API -> DB : Get Kriteria & Bobot (AHPCriteria)
-    activate DB
-    DB --> API : List Bobot
-    deactivate DB
-    
-    API -> AHP : Hitung Skor (Input User * Bobot)
-    activate AHP
-    AHP -> AHP : Normalisasi & Sum
-    AHP --> API : Return Skor Final & Prioritas\n(Low/Medium/High/Critical)
-    deactivate AHP
+alt Auto Assign Enabled 
+    Server -> DB : Cari User Role IT_SUPPORT (Random)
+    Server -> Server : Set AssigneeID, Status = IN_PROGRESS
+else Manual Assign
+    Server -> Server : Status = OPEN, AssigneeID = Null
 end
 
-API -> DB : Create Ticket (Status: OPEN, Priority: From AHP)
-activate DB
-DB --> API : Ticket Created (ID: TIK-001)
-deactivate DB
+Server -> DB : prisma.ticket.create()
+DB --> Server : Sukses (Ticket Dibuat)
 
-par Notifikasi Async
-    API -> WA : Kirim Pesan WA ke IT Support/Admin
-    WA --> User : (Optional) Notifikasi ke Manager
-end
-
-API --> UI : Response Sukses (201 Created)
-deactivate API
-
-UI -> User : Tampilkan Sukses & Redirect ke Detail
+Server -> DB : Buat Notifikasi Dalam Web (In-App) untuk Admin/IT
+Server -> WA : Trigger Async: notifyNewTicket()
+WA -> User : (Berjalan di background)
+Server --> UI : Response Sukses (201)
+UI -> User : Redirect ke Detail Tiket
 @enduml
 ```
 
-## 3. Penugasan Tiket (Ticket Assignment)
-Diagram ini menjelaskan bagaimana Manager atau Admin menugaskan tiket kepada Staff IT.
-
+## 5. Create Ticket dengan AHP 
 ```plantuml
 @startuml
-actor Manager as "Manager / Admin"
-boundary UI as "Dashboard Manager"
-control API as "API: /api/tickets/assigned"
+actor User as "User"
+boundary UI as "Form (+ Slider AHP)"
+control Server as "API: POST /api/tickets/create"
+control WA as "WhatsApp & Email"
 database DB as "Database"
-actor Staff as "Staff IT (Assignee)"
 
-Manager -> UI : Lihat Tiket 'Unassigned'
-UI -> API : GET /api/tickets/unassigned
-activate API
-API -> DB : Query Tiket (Status: Open, Assignee: Null)
-DB --> API : List Tiket
-API --> UI : Tampilkan Data
-deactivate API
+User -> UI : Geser Slider & Isi Detail
+UI -> Server : POST JSON (Data & ahpScores)
+Server -> DB : GET aHPCriteria (Bobot Kriteria)
+DB --> Server : Return Bobot
 
-Manager -> UI : Pilih Staff & Klik 'Assign'
-UI -> API : PUT /api/tickets/{id}/assign\n(assigneeId)
-activate API
+group Perhitungan AHP Backend
+    Server -> Server : Hitung Total = Sum(Input * Bobot)
+    Server -> Server : Normalisasi Skor if needed
+    Server -> Server : Mapping Skor -> LOW/MEDIUM/HIGH/CRITICAL
+    alt Jika ada maks slider (4 atau 5)
+        Server -> Server : Override Failsafe (Minimal MEDIUM / HIGH)
+    end
+end
 
-API -> API : Cek Role Manager
-API -> DB : Update Tiket (Assignee = ID Staff, Status = IN_PROGRESS)
-activate DB
-DB --> API : Update Success
-deactivate DB
+Server -> DB : Cek sistem Auto-Assign & Simpan Tiket (Create)
+DB --> Server : Tiket Tersimpan
 
-API -> API : Create Notification Log
-
-API --> UI : Response OK
-deactivate API
-
-UI -> Manager : Update Tampilan List Tiket
-
-note right of Staff : Staff bisa melihat tiket ini\ndi menu 'Tiket Saya'
+Server -> DB : prisma.notification.createMany (Untuk Admin)
+Server -> WA : Async trigger notifikasi WA/Email
+Server --> UI : Response 201 Created
+UI -> User : Tampilkan Notifikasi Sukses
 @enduml
 ```
 
-## 4. Diskusi & Komentar (Comment Flow)
-Diagram ini menjelaskan interaksi komentar antara Pelapor dan IT Support.
-
+## 6. Tracking Status & History 
 ```plantuml
 @startuml
-actor User as "Pelapor / Staff IT"
+actor User as "User"
 boundary UI as "Halaman Detail Tiket"
-control API as "API: /api/tickets/{id}/comments"
+control Server as "API: GET /api/tickets/[id]"
 database DB as "Database"
-control Notify as "Notification System"
 
-User -> UI : Ketik Komentar & Kirim
-UI -> API : POST /api/tickets/{id}/comments\n(Content, Attachments)
-activate API
-
-API -> DB : Simpan Komentar
-activate DB
-DB --> API : Komentar Tersimpan
-deactivate DB
-
-API -> DB : Get Ticket Details (Creator & Assignee)
-activate DB
-DB --> API : Return Info Pembuat & Teknisi
-deactivate DB
-
-alt Jika Pelapor yang komen
-    API -> Notify : Buat Notifikasi untuk Teknisi
-else Jika Teknisi yang komen
-    API -> Notify : Buat Notifikasi untuk Pelapor
-end
-
-API --> UI : Response JSON (Komentar Baru)
-deactivate API
-
-UI -> User : Update List Komentar (Realtime/Optimistic)
+User -> UI : Klik tiket di antrian
+UI -> Server : GET /api/tickets/{id}
+Server -> DB : prisma.ticket.findUnique()\n(Include: creator, assignee, comments)
+DB --> Server : Data Tiket Utuh
+Server --> UI : Return JSON 
+UI -> User : Render Status Terkini & Tabel History / Komentar
 @enduml
 ```
 
-## 5. Penyelesaian Tiket (Resolution Flow)
-Diagram ini menjelaskan penutupan tiket oleh Staff IT atau Manager.
-
+## 7. Komentar & Balasan (Diskusi)
 ```plantuml
 @startuml
-actor IT as "Staff IT / Manager"
-boundary UI as "Detail Tiket"
-control API as "API: /api/tickets/{id}/status"
+actor Actor as "User / IT Support"
+boundary UI as "Tab Percakapan"
+control Server as "API: POST /api/tickets/[id]/comments"
 database DB as "Database"
-control WA as "WhatsApp Service"
-actor User as "Pelapor"
 
-IT -> UI : Ubah Status Tiket -> RESOLVED/CLOSED
-UI -> API : PATCH /api/tickets/{id}/status\n(status: CLOSED)
-activate API
+Actor -> UI : Ketik pesan & Klik Kirim
+UI -> Server : POST Content + Attachments
+Server -> DB : prisma.comment.create()
+DB --> Server : Komentar Tersimpan
 
-API -> DB : Update Status Tiket
-activate DB
-DB --> API : Sukses
-deactivate DB
-
-group Notifikasi Selesai
-    API -> WA : Kirim Pesan WA ke Pelapor
-    WA -> User : "Tiket Anda Telah Selesai"
-end
-
-API --> UI : Response Sukses
-deactivate API
-
-UI -> IT : Status Tiket Berubah jadi Hijau (Closed)
+Server -> DB : Get Lawan Bicara (Creator/Assignee)
+Server -> DB : Buat Notifikasi (NEW_COMMENT) 
+Server --> UI : Kembalikan obyek Komentar
+UI -> Actor : Update UI Percakapan secara Real-Time
 @enduml
 ```
 
-## 6. Manajemen Spam (Spam Handling)
-Diagram ini menjelaskan pemindahan tiket ke folder Spam atau penghapusan permanen.
-
+## 8. Upload Bukti
 ```plantuml
 @startuml
-actor Admin as "Admin"
-boundary UI as "Dashboard Tiket"
-control API as "API: /api/tickets/{id}/spam"
+actor User as "User / IT Support"
+boundary UI as "Komponen Upload"
+control Server as "API Upload / Cloudinary"
+
+User -> UI : Pilih File Ext (*.jpg, *.png)
+UI -> Server : FormData / POST File Image
+Server -> Server : Validasi Format & Size
+Server -> Server : Simpan ke Media Storage
+Server --> UI : Response (Image URL Terenkripsi)
+UI -> User : Tampilkan Thumbnail di Area Teks
+@enduml
+```
+
+## 9. Claim Tiket (Self-Assignment IT Support)
+```plantuml
+@startuml
+actor ITSupport as "IT Support"
+boundary UI as "Tombol 'Ambil Tiket'"
+control Server as "API: PUT /api/tickets/[id]/claim"
 database DB as "Database"
 
-Admin -> UI : Pilih Tiket -> Tandai Spam
-UI -> API : PATCH /api/tickets/{id}/status\n(status: CANCELLED/SPAM)
-activate API
+ITSupport -> UI : Buka Tiket Belum Ditugaskan -> Ambil
+UI -> Server : PUT /claim
+Server -> DB : Cek apakah tiket sudah di-assign (Assignee != null)
 
-API -> DB : Update Status -> CANCELLED
+alt Sudah Diambil Orang Lain
+    Server --> UI : Error "Ticket already assigned" (400)
+else Belum Diambil
+    Server -> DB : Update assigneeId = session.user.id
+    Server -> DB : set status = IN_PROGRESS
+    DB --> Server : Sukses Update
+    Server --> UI : Response Berhasil
+    UI -> ITSupport : Notifikasi "Berhasil Diambil"
+end
+@enduml
+```
+
+## 10. Update Progress & Log Aktivitas
+```plantuml
+@startuml
+actor ITSupport as "IT Support"
+boundary UI as "Dropdown Status"
+control Server as "API: PUT /api/tickets/[id]/status"
+control Ext as "WA / Email Gateway"
+database DB as "Database"
+
+ITSupport -> UI : Pilih status baru (Misal: RESOLVED)
+UI -> Server : PUT Data { status: "RESOLVED" }
+Server -> Server : Validasi jika status valid
+
+Server -> DB : prisma.ticket.update()
+Server -> DB : prisma.notification.create() (Ke Pelapor: "Status Berubah")
+
+group Notifikasi & Log
+    Server -> Ext : Async Panggil notifyTicketStatusChange
+    Server -> DB : prisma.comment.create({content: "Status changed to RESOLVED"})
+end
+
+Server --> UI : Return Tiket Update
+UI -> ITSupport : Tampil Status Hijau / Selesai Serta Catatan Log "System"
+@enduml
+```
+
+## 11. Notifikasi Automatis WA (Sistem)
+```plantuml
+@startuml
+control Trigger as "Trigger Backend \n(Create / Status Update)"
+control HTTP as "Fonnte / Webhook WA"
+actor User as "Penerima (Admin / Pelapor)"
+
+Trigger -> Trigger : Panggil Fungsi WhatsAppService.notify()
+Trigger -> HTTP : POST API Request \nAuth Token & Target Number
+HTTP -> HTTP : Enqueue Kirim Pesan
+HTTP -> User : Kirim Chat WhatsApp Asli (Bot)
+@enduml
+```
+
+## 12. Pembatalan Tiket (Soft Delete)
+```plantuml
+@startuml
+actor Actor as "User (Creator) / Admin"
+boundary UI as "Halaman Tiket"
+control Server as "API: PUT /api/tickets/[id]/status"
+database DB as "Database"
+
+Actor -> UI : Pilih Update Status menjadi "CANCELLED"
+UI -> Server : PUT status = CANCELLED
+Server -> Server : Validasi (Sama Seperti Update Status)
+Server -> DB : Update tiket.status = CANCELLED
+Server -> DB : System Comment "Status changed to CANCELLED"
+Server --> UI : Return Berhasil
+UI -> Actor : Notifikasi dan Visual berubah jadi Spam/Batal
+@enduml
+```
+
+## 13. Restore Tiket (Kembalikan Dari Dibatalkan)
+```plantuml
+@startuml
+actor Admin as "Admin / Manager"
+boundary UI as "List Tiket Dibatalkan"
+control Server as "API: PATCH /api/tickets/[id]/restore"
+database DB as "Database"
+
+Admin -> UI : Klik tombol "Restore / Pulihkan"
+UI -> Server : PATCH request
+Server -> Server : Validasi Role Privileged / Creator Validitas
+Server -> DB : prisma.ticket.update({ status: "OPEN" })
+DB --> Server : Status Berhasil Dibuka Kembali
+Server --> UI : OK (200)
+UI -> Admin : Tiket Kembali ke Tab Antrian Aktif Utama
+@enduml
+```
+
+## 14. Hapus Permanen (Hard Delete Berantai)
+```plantuml
+@startuml
+actor Admin as "Super Admin / Manager"
+boundary UI as "Dashboard Spam/Sampah"
+control Server as "API: DELETE /api/tickets/[id]"
+database DB as "Database"
+
+Admin -> UI : Confirm Hapus Permanen
+UI -> Server : DELETE request
+Server -> Server : Validasi Session & Role Otoritas
+
+Server -> DB : Memulai prisma.$transaction()
 activate DB
-DB --> API : Sukses
+DB -> DB : 1. deleteMany() -> Notification relasi
+DB -> DB : 2. deleteMany() -> Comment & Diskusi relasi
+DB -> DB : 3. delete() -> Data Ticket Utama
+DB --> Server : Transaksi Selesai Sukses
 deactivate DB
 
-API --> UI : Response OK
-deactivate API
-UI -> Admin : Tiket Hilang dari List Utama
+Server --> UI : Response {success: true}
+UI -> Admin : Baris Terhapus Selamanya Dari UI
+@enduml
+```
 
-== Hapus Permanen (Hard Delete) ==
-Admin -> UI : Buka Menu Spam -> Hapus Permanen
-UI -> API : DELETE /api/tickets/spam/{id}
-activate API
-API -> DB : Transaction: Delete Comments, Notifs, Ticket
-activate DB
-DB --> API : Deleted
-deactivate DB
-API --> UI : Response OK
-deactivate API
-UI -> Admin : Tiket Terhapus Selamanya
+## 15. Membuat Artikel Knowledge Base
+```plantuml
+@startuml
+actor Adm as "Admin / IT Support"
+boundary UI as "Editor Artikel KB"
+control Server as "API /api/kb/create"
+database DB as "Database"
+
+Adm -> UI : Tulis Solusi & Penjelasan IT
+UI -> Server : POST Data Artikel
+Server -> DB : Insert Data (prisma.knowledgeBase.create)
+DB --> Server : Sukses Masuk
+Server --> UI : Response 201
+UI -> Adm : Redirect Daftar Bacaan (Selesai)
 @enduml
 ```
