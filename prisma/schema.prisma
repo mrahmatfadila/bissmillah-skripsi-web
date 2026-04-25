@@ -139,7 +139,13 @@ model SystemSetting {
 }
 
 enum Role {
+  SUPER_ADMIN
   IT_SUPPORT
+  MANAGER
+  SUPERVISOR
+  FINANCE
+  STAFF
+  SECURITY
   SUPERVISOR_SHOP
 }
 
