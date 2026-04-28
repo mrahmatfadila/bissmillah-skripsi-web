@@ -31,7 +31,7 @@ import dynamic from 'next/dynamic';
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false });
 import { toast } from "sonner";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, translateStatus } from "@/lib/utils";
 import { useSystemSettings } from "@/components/settings-provider";
 
 const FormattedDate = ({ date }: { date: string | Date }) => {
@@ -366,7 +366,7 @@ export default function TicketDetailClient({ ticket, currentUser }: TicketDetail
                                 {ticket.priority}
                             </Badge>
                             <Badge variant="outline" className={cn("border whitespace-nowrap", getStatusColor(status))}>
-                                {status.replace(/_/g, " ")}
+                                {translateStatus(status)}
                             </Badge>
                             {slaStatus && (
                                 <Badge variant="outline" className={cn("border whitespace-nowrap", slaStatus.color)} title="Service Level Agreement">
@@ -781,12 +781,12 @@ export default function TicketDetailClient({ ticket, currentUser }: TicketDetail
                                                 <SelectValue placeholder="Pilih Status" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="OPEN">Terbuka (Open)</SelectItem>
-                                                <SelectItem value="IN_PROGRESS">Diproses (In Progress)</SelectItem>
-                                                <SelectItem value="PENDING">Tertunda (Pending)</SelectItem>
-                                                <SelectItem value="RESOLVED">Selesai (Resolved)</SelectItem>
-                                                <SelectItem value="CLOSED">Ditutup (Closed)</SelectItem>
-                                                <SelectItem value="CANCELLED">Dibatalkan (Cancelled)</SelectItem>
+                                                <SelectItem value="OPEN">Terbuka</SelectItem>
+                                                <SelectItem value="IN_PROGRESS">Di Proses</SelectItem>
+                                                <SelectItem value="PENDING">Tertunda</SelectItem>
+                                                <SelectItem value="RESOLVED">Selesai</SelectItem>
+                                                <SelectItem value="CLOSED">Ditutup</SelectItem>
+                                                <SelectItem value="CANCELLED">Dibatalkan</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>

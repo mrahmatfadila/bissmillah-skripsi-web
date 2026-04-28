@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Search, Loader2, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useSystemSettings } from "@/components/settings-provider";
+import { translateStatus } from "@/lib/utils";
 
 interface Ticket {
     id: string;
@@ -78,9 +79,11 @@ export default function AssignedTicketsPage() {
     // Status order and labels
     const statusConfig = [
         { key: 'OPEN', label: 'Terbuka', color: 'bg-blue-500', count: groupedTickets['OPEN']?.length || 0 },
-        { key: 'IN_PROGRESS', label: 'Sedang Diproses', color: 'bg-orange-500', count: groupedTickets['IN_PROGRESS']?.length || 0 },
+        { key: 'IN_PROGRESS', label: 'Di Proses', color: 'bg-orange-500', count: groupedTickets['IN_PROGRESS']?.length || 0 },
         { key: 'PENDING', label: 'Tertunda', color: 'bg-purple-500', count: groupedTickets['PENDING']?.length || 0 },
         { key: 'RESOLVED', label: 'Selesai', color: 'bg-green-500', count: groupedTickets['RESOLVED']?.length || 0 },
+        { key: 'CLOSED', label: 'Ditutup', color: 'bg-gray-500', count: groupedTickets['CLOSED']?.length || 0 },
+        { key: 'CANCELLED', label: 'Dibatalkan', color: 'bg-red-500', count: groupedTickets['CANCELLED']?.length || 0 },
     ];
 
     return (
@@ -115,9 +118,11 @@ export default function AssignedTicketsPage() {
                 >
                     <option value="ALL">Semua Status</option>
                     <option value="OPEN">Terbuka</option>
-                    <option value="IN_PROGRESS">Sedang Diproses</option>
+                    <option value="IN_PROGRESS">Di Proses</option>
                     <option value="PENDING">Tertunda</option>
                     <option value="RESOLVED">Selesai</option>
+                    <option value="CLOSED">Ditutup</option>
+                    <option value="CANCELLED">Dibatalkan</option>
                 </select>
                 <select
                     value={filterPriority}
@@ -183,10 +188,12 @@ export default function AssignedTicketsPage() {
                                                         </Badge>
                                                         <Badge className={`whitespace-nowrap ${ticket.status === 'OPEN' ? 'bg-blue-100 text-blue-700' :
                                                             ticket.status === 'IN_PROGRESS' ? 'bg-orange-100 text-orange-700' :
-                                                                ticket.status === 'PENDING' ? 'bg-purple-100 text-purple-700' :
+                                                            ticket.status === 'PENDING' ? 'bg-purple-100 text-purple-700' :
+                                                            ticket.status === 'CLOSED' ? 'bg-gray-100 text-gray-700' :
+                                                            ticket.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
                                                                     'bg-green-100 text-green-700'
                                                             }`}>
-                                                            {ticket.status.replace('_', ' ')}
+                                                            {translateStatus(ticket.status)}
                                                         </Badge>
                                                     </div>
                                                 </CardHeader>

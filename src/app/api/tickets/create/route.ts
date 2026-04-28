@@ -152,15 +152,39 @@ export async function POST(request: Request) {
         });
 
         if (admins.length > 0) {
+            const notificationsData = admins.map(admin => ({
+                userId: admin.id,
+                title: `Tiket Baru: #${ticketNumber}`,
+                message: `${session.user.name || "User"} membuat tiket baru: ${title}`,
+                type: "NEW_TICKET",
+                link: `/tickets/${ticket.id}`,
+                ticketId: ticket.id
+            }));
+
+            // Notifikasi untuk pembuat tiket
+            notificationsData.push({
+                userId: session.user.id,
+                title: `Tiket Berhasil Dibuat: #${ticketNumber}`,
+                message: `Tiket Anda "${title}" telah berhasil dibuat dan sedang menunggu respon.`,
+                type: "NEW_TICKET",
+                link: `/tickets/${ticket.id}`,
+                ticketId: ticket.id
+            });
+
             await prisma.notification.createMany({
-                data: admins.map(admin => ({
-                    userId: admin.id,
-                    title: `Tiket Baru: #${ticketNumber}`,
-                    message: `${session.user.name || "User"} membuat tiket baru: ${title}`,
+                data: notificationsData
+            });
+        } else {
+            // Jika tidak ada admin, tetap kirim notif ke pembuat
+            await prisma.notification.create({
+                data: {
+                    userId: session.user.id,
+                    title: `Tiket Berhasil Dibuat: #${ticketNumber}`,
+                    message: `Tiket Anda "${title}" telah berhasil dibuat dan sedang menunggu respon.`,
                     type: "NEW_TICKET",
                     link: `/tickets/${ticket.id}`,
                     ticketId: ticket.id
-                }))
+                }
             });
         }
 
@@ -171,6 +195,12 @@ export async function POST(request: Request) {
         // Send Email Notification (Async - fire and forget)
         EmailService.notifyNewTicket(ticket, session.user.name || "User")
             .catch(err => console.error("Failed to trigger Email notification", err));
+
+        // Notifikasi Email untuk Pembuat Tiket
+        if (session.user.email) {
+            EmailService.notifyTicketCreatedForUser(ticket, session.user.email, session.user.name || "User")
+                .catch(err => console.error("Failed to trigger Email notification for user", err));
+        }
 
         return NextResponse.json(ticket, { status: 201 });
     } catch (error) {

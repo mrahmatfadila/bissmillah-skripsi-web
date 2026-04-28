@@ -5,9 +5,6 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
-
-
 export async function GET(request: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -15,8 +12,7 @@ export async function GET(request: Request) {
 
         const tickets = await prisma.ticket.findMany({
             where: {
-                assigneeId: session.user.id,
-                status: { not: 'CLOSED' }
+                assigneeId: session.user.id
             },
             include: {
                 creator: { select: { name: true, department: true, image: true } }

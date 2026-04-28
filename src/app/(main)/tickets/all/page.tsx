@@ -13,6 +13,7 @@ import { CreateTicketDialog } from "@/components/tickets/create-ticket-dialog";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSystemSettings } from "@/components/settings-provider";
+import { translateStatus } from "@/lib/utils";
 
 interface Ticket {
     id: string;
@@ -246,7 +247,7 @@ export default function AllTicketsPage() {
                                                                 {ticket.ticketNumber || `#${ticket.id.slice(-6).toUpperCase()}`}
                                                             </span>
                                                             <Badge variant="secondary" className={getStatusColor(ticket.status)}>
-                                                                {ticket.status.replace(/_/g, " ")}
+                                                                {translateStatus(ticket.status)}
                                                             </Badge>
                                                             <Badge variant="secondary" className={getPriorityColor(ticket.priority)}>
                                                                 {ticket.priority}

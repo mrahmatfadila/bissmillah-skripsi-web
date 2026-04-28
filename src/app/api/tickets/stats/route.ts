@@ -5,7 +5,6 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function GET(request: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -49,10 +48,27 @@ export async function GET(request: Request) {
             });
         }
 
+        // 4. Status Counts
+        const whereStatus: any = {
+            assigneeId: userId
+        };
+
+        const statusCountsRaw = await prisma.ticket.groupBy({
+            by: ['status'],
+            where: whereStatus,
+            _count: { status: true }
+        });
+
+        const statusCounts = statusCountsRaw.reduce((acc: any, curr) => {
+            acc[curr.status.toLowerCase()] = curr._count.status;
+            return acc;
+        }, { open: 0, in_progress: 0, pending: 0, resolved: 0, closed: 0, cancelled: 0 });
+
         return NextResponse.json({
             mine: unreadNotificationsCount, // Changed to unread notifications as per user request
             all: unreadNotificationsCount,
-            unassigned: unassignedCount
+            unassigned: unassignedCount,
+            ...statusCounts
         });
 
     } catch (error) {

@@ -12,6 +12,7 @@ import { AgentsLeadership } from "@/components/dashboard/agents-leadership";
 import { TopDepartmentsChart } from "@/components/dashboard/top-departments-chart";
 import { IssueTable } from "@/components/dashboard/issue-table";
 import { Clock, Send } from "lucide-react";
+import { translateStatus } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
 
@@ -59,7 +60,7 @@ export default async function DashboardPage() {
     };
 
     const ticketsByStatus = ticketsByStatusRaw.map(item => ({
-        name: item.status.replace(/_/g, " "),
+        name: translateStatus(item.status),
         value: item._count.status,
         color: statusColors[item.status] || '#cbd5e1'
     }));

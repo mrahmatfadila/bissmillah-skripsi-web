@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import { useSystemSettings } from "@/components/settings-provider";
+import { translateStatus } from "@/lib/utils";
 
 
 export function ActiveTicketsList({ tickets: allTickets }: { tickets: any[] }) {
@@ -81,7 +82,7 @@ export function ActiveTicketsList({ tickets: allTickets }: { tickets: any[] }) {
                                             <span className="text-xs text-muted-foreground whitespace-nowrap">
                                                 {formatDate(ticket.createdAt)}
                                             </span>
-                                            <Badge variant="secondary" className="border-none whitespace-nowrap">{ticket.status}</Badge>
+                                            <Badge variant="secondary" className="border-none whitespace-nowrap">{translateStatus(ticket.status)}</Badge>
                                         </div>
                                     </div>
 

@@ -44,7 +44,7 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
         category: defaultCategory || "IT_SUPPORT",
     });
 
-    const [ahpCriteria, setAhpCriteria] = useState<{ id: string, name: string, weight: number }[]>([]);
+    const [ahpCriteria, setAhpCriteria] = useState<{ id: string, name: string, weight: number, description?: string | null }[]>([]);
     const [ahpScores, setAhpScores] = useState<Record<string, number>>({});
 
     const isSupervisor = session?.user?.role === "SUPERVISOR";
@@ -390,8 +390,13 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
                                     {ahpCriteria.map((c) => (
                                         <div key={c.name} className="space-y-3 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors hover:border-blue-300 pointer-events-auto">
                                             <div className="flex justify-between items-center text-sm font-bold">
-                                                <Label className="text-slate-700 dark:text-slate-200 cursor-pointer">{c.name}</Label>
-                                                <span className="bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-md shadow-sm border border-slate-100 dark:border-slate-700 text-xs">Nilai: {ahpScores[c.name] || 1}</span>
+                                                <div>
+                                                    <Label className="text-slate-700 dark:text-slate-200 cursor-pointer">{c.name}</Label>
+                                                    {c.description && (
+                                                        <p className="text-[11px] text-muted-foreground mt-0.5 font-normal">{c.description}</p>
+                                                    )}
+                                                </div>
+                                                <span className="bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-md shadow-sm border border-slate-100 dark:border-slate-700 text-xs shrink-0 ml-2">Nilai: {ahpScores[c.name] || 1}</span>
                                             </div>
                                             <div className="relative pt-1 pb-2">
                                                 <input

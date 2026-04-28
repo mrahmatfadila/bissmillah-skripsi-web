@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Calendar, User } from "lucide-react";
 import { useSystemSettings } from "@/components/settings-provider";
+import { translateStatus } from "@/lib/utils";
 
 interface Ticket {
     id: string;
@@ -50,13 +51,13 @@ export default function StatusTicketPage() {
         }
     };
 
-    const displayStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
+    const displayStatus = translateStatus(rawStatus.toUpperCase());
 
     return (
         <div className="min-h-screen bg-background p-6">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-foreground">{displayStatus} Tiket</h1>
+                    <h1 className="text-2xl font-bold text-foreground">Tiket {displayStatus}</h1>
                     <p className="text-muted-foreground text-sm">Menampilkan semua tiket dengan status: {displayStatus}</p>
                 </div>
 
@@ -81,7 +82,7 @@ export default function StatusTicketPage() {
                                                 <div className="flex items-center gap-2">
                                                     <Badge variant="outline" className="font-mono text-xs text-muted-foreground">{t.id.slice(-6).toUpperCase()}</Badge>
                                                     <Badge className={getPriorityColor(t.priority)} variant="secondary">{t.priority}</Badge>
-                                                    <Badge variant="default" className="bg-slate-800 text-white dark:bg-slate-700">{t.status}</Badge>
+                                                    <Badge variant="default" className="bg-slate-800 text-white dark:bg-slate-700">{translateStatus(t.status)}</Badge>
                                                 </div>
                                                 <h3 className="font-semibold text-foreground group-hover:text-blue-600 transition-colors">{t.title}</h3>
                                                 <div className="flex items-center gap-4 text-xs text-muted-foreground">

@@ -5,9 +5,6 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
-
-
 export async function GET(request: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -18,21 +15,9 @@ export async function GET(request: Request) {
         const department = searchParams.get('department');
 
         const where: any = {};
-        const role = session.user.role;
-
-        // Role-based Access Control for Data Visibility
-        if (role === 'FINANCE') {
-            where.category = 'FINANCE';
-        } else if (role === 'SECURITY') {
-            where.category = 'SECURITY';
-        } else if (role === 'IT_SUPPORT') {
-            where.category = { in: ['IT_SUPPORT', 'GENERAL'] }; // Usually IT handles General too
-        }
-        // SUPER_ADMIN and MANAGER see all
-
-        // If department param is passed, it might conflict or refine the role-based filter.
-        // For now, if role restricts to FINANCE, and they request SECURITY dept, they get nothing (which is correct).
-
+        
+        // Link Status menu to Tugas Saya (Assigned tickets)
+        where.assigneeId = session.user.id;
 
         if (status) {
             const statusKey = status.toLowerCase();
@@ -56,32 +41,15 @@ export async function GET(request: Request) {
                     where.status = 'CANCELLED';
                     break;
                 default:
-                    // Fallback to exact match if it matches a DB enum, or ignore
-                    // Try to match standard enum if passed directly
                     where.status = status.toUpperCase();
                     break;
             }
         }
 
         if (department) {
-            // Filter by tickets created_by users in that department? 
-            // OR tickets assigned to that department?
-            // The request was "Departements yg berisi ticket", likely tickets belonging to that category/department
-            // Schema has `category` on Ticket (e.g. IT_SUPPORT)
-            // But sidebar also lists "Shop", "Finance". 
-            // If the user meant "Tickets FROM Finance", we use creator.department.
-            // If "Tickets FOR Finance", we use category.
-            // Let's assume Category for now as it maps to the support queues.
-
-            // Handle some mappings
             if (department === 'IT_SUPPORT') where.category = 'IT_SUPPORT';
             else if (department === 'SECURITY') where.category = 'SECURITY';
             else if (department === 'FINANCE') where.category = 'FINANCE';
-            else {
-                // If it's a generic department name like 'shop', we might want to search
-                // department string in the Creator user?
-                // For now, let's leave it as category or null
-            }
         }
 
         const tickets = await prisma.ticket.findMany({

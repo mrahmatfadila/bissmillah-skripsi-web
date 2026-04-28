@@ -38,7 +38,7 @@ export default function MyTicketsPage() {
     const [loading, setLoading] = useState(true);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    const [activeTab, setActiveTab] = useState<"ALL" | "OPEN" | "IN_PROGRESS" | "RESOLVED">("ALL");
+    const [activeTab, setActiveTab] = useState<"ALL" | "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "CANCELLED">("ALL");
     const { formatDate } = useSystemSettings();
 
     const categoryParam = searchParams.get('category');
@@ -74,9 +74,12 @@ export default function MyTicketsPage() {
     const stats = useMemo(() => {
         return {
             total: tickets.length,
-            open: tickets.filter(t => ['OPEN', 'PENDING'].includes(t.status)).length,
+            open: tickets.filter(t => t.status === 'OPEN').length,
+            pending: tickets.filter(t => t.status === 'PENDING').length,
             progress: tickets.filter(t => t.status === 'IN_PROGRESS').length,
-            resolved: tickets.filter(t => ['RESOLVED', 'CLOSED'].includes(t.status)).length,
+            resolved: tickets.filter(t => t.status === 'RESOLVED').length,
+            closed: tickets.filter(t => t.status === 'CLOSED').length,
+            cancelled: tickets.filter(t => t.status === 'CANCELLED').length,
         };
     }, [tickets]);
 
@@ -85,11 +88,15 @@ export default function MyTicketsPage() {
         
         // Apply Tab Filter
         if (activeTab === 'OPEN') {
-            result = result.filter(t => ['OPEN', 'PENDING'].includes(t.status));
+            result = result.filter(t => t.status === 'OPEN');
         } else if (activeTab === 'IN_PROGRESS') {
             result = result.filter(t => t.status === 'IN_PROGRESS');
         } else if (activeTab === 'RESOLVED') {
-            result = result.filter(t => ['RESOLVED', 'CLOSED'].includes(t.status));
+            result = result.filter(t => t.status === 'RESOLVED');
+        } else if (activeTab === 'CLOSED') {
+            result = result.filter(t => t.status === 'CLOSED');
+        } else if (activeTab === 'CANCELLED') {
+            result = result.filter(t => t.status === 'CANCELLED');
         }
 
         // Apply Search
@@ -107,9 +114,9 @@ export default function MyTicketsPage() {
 
     const getStatusUI = (status: string) => {
         switch (status) {
-            case "OPEN": return { color: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800", icon: <AlertCircle className="w-3 h-3 mr-1" />, label: "Menunggu" };
+            case "OPEN": return { color: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800", icon: <AlertCircle className="w-3 h-3 mr-1" />, label: "Terbuka" };
             case "PENDING": return { color: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800", icon: <Clock className="w-3 h-3 mr-1" />, label: "Tertunda" };
-            case "IN_PROGRESS": return { color: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800", icon: <Activity className="w-3 h-3 mr-1" />, label: "Diproses" };
+            case "IN_PROGRESS": return { color: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800", icon: <Activity className="w-3 h-3 mr-1" />, label: "Di Proses" };
             case "RESOLVED": return { color: "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800", icon: <CheckCircle2 className="w-3 h-3 mr-1" />, label: "Selesai" };
             case "CLOSED": return { color: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700", icon: <CheckCircle2 className="w-3 h-3 mr-1" />, label: "Ditutup" };
             case "CANCELLED": return { color: "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800", icon: <AlertCircle className="w-3 h-3 mr-1" />, label: "Dibatalkan" };
@@ -170,7 +177,7 @@ export default function MyTicketsPage() {
                                 <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
                             <div>
-                                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Menunggu</p>
+                                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Terbuka</p>
                                 <h3 className="text-lg sm:text-2xl font-bold">{stats.open}</h3>
                             </div>
                         </CardContent>
@@ -181,7 +188,7 @@ export default function MyTicketsPage() {
                                 <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
                             <div>
-                                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Diproses</p>
+                                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Di Proses</p>
                                 <h3 className="text-lg sm:text-2xl font-bold">{stats.progress}</h3>
                             </div>
                         </CardContent>
@@ -204,9 +211,12 @@ export default function MyTicketsPage() {
                     <div className="flex w-full md:w-auto overflow-x-auto hide-scrollbar gap-1 p-1">
                         {[
                             { id: "ALL", label: "Semua Tiket" },
-                            { id: "OPEN", label: "Menunggu", count: stats.open },
-                            { id: "IN_PROGRESS", label: "Diproses", count: stats.progress },
+                            { id: "OPEN", label: "Terbuka", count: stats.open },
+                            { id: "IN_PROGRESS", label: "Di Proses", count: stats.progress },
+                            { id: "PENDING", label: "Tertunda", count: stats.pending },
                             { id: "RESOLVED", label: "Selesai", count: stats.resolved },
+                            { id: "CLOSED", label: "Ditutup", count: stats.closed },
+                            { id: "CANCELLED", label: "Dibatalkan", count: stats.cancelled },
                         ].map((tab) => (
                             <button
                                 key={tab.id}

@@ -1,0 +1,34 @@
+@startuml
+left to right direction
+
+title Use Case Diagram - IT Ticketing Support
+
+actor "Supervisor Shop" as SPV
+actor "IT Support" as IT
+
+rectangle "Sistem IT Ticketing Support" {
+
+  SPV --> (Login)
+  SPV --> (Membuat Tiket)
+  SPV --> (Melihat Tiket Saya)
+  SPV --> (Komentar & Lampiran)
+  SPV --> (Membaca Knowledge Base)
+  SPV --> (Menerima Notifikasi)
+
+  IT --> (Login)
+  IT --> (Melihat Semua Tiket)
+  IT --> (Update Status & Prioritas)
+  IT --> (Assign Tiket)
+  IT --> (Menutup Tiket)
+  IT --> (Komentar & Lampiran)
+  IT --> (Kelola Knowledge Base)
+  IT --> (Membaca Knowledge Base)
+  IT --> (Menerima Notifikasi)
+  IT --> (Melihat Jadwal Shift)
+  IT --> (Tukar Shift)
+  IT --> (Kelola Kriteria AHP)
+  IT --> (Kelola Pengguna)
+
+}
+
+@enduml

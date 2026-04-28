@@ -5,13 +5,9 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
-
-
 export async function GET(request: Request) {
     try {
         const session = await getServerSession(authOptions);
-        // Allow all authenticated users to read criteria (needed for ticket creation form)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
@@ -30,28 +26,24 @@ export async function GET(request: Request) {
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        // Only IT Support, Manager, or Super Admin should probably touch this, adhering to strict rules: Super Admin only for settings usually.
         if (!session || session.user.role !== 'IT_SUPPORT') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
         const body = await req.json();
-        const { criteria } = body; // Expect array of { name, weight }
+        const { criteria } = body;
 
         if (!Array.isArray(criteria)) {
             return NextResponse.json({ error: 'Invalid data format' }, { status: 400 });
         }
 
-        // Transaction to update all
         await prisma.$transaction(async (tx) => {
-            // Clear existing? Or update/upsert.
-            // Let's delete all and recreate to ensure clean slate matching the AHP matrix result
             await tx.aHPCriteria.deleteMany({});
-
             await tx.aHPCriteria.createMany({
                 data: criteria.map((c: any) => ({
                     name: c.name,
-                    weight: parseFloat(c.weight)
+                    weight: parseFloat(c.weight),
+                    description: c.description || null
                 }))
             });
         });

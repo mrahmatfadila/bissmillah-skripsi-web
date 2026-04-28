@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { EmailService } from "@/lib/email";
 
 export const dynamic = 'force-dynamic';
 
@@ -55,6 +56,39 @@ export async function POST(req: Request) {
                 ${now}
             )
         `;
+
+        try {
+            const targetUser = await prisma.user.findFirst({
+                where: { name: { contains: targetName, mode: 'insensitive' } }
+            });
+
+            if (targetUser) {
+                const targetDateStr = new Date(targetDate).toLocaleDateString('id-ID', { dateStyle: 'full' });
+                const requesterDateStr = new Date(requesterDate).toLocaleDateString('id-ID', { dateStyle: 'full' });
+
+                await prisma.notification.create({
+                    data: {
+                        userId: targetUser.id,
+                        title: `Tukar Shift: ${requesterName}`,
+                        message: `${requesterName} ingin menukar shift ${targetShift} Anda (${targetDateStr}) dengan shift ${requesterShift} (${requesterDateStr}).`,
+                        type: "SYSTEM",
+                        link: `/dashboard/settings/schedule/swap`
+                    }
+                });
+
+                if (targetUser.email) {
+                    EmailService.notifyShiftSwapRequest(
+                        targetUser.email,
+                        targetUser.name || targetName,
+                        requesterName,
+                        `${targetShift} - ${targetDateStr}`,
+                        `${requesterShift} - ${requesterDateStr}`
+                    ).catch(err => console.error("Email swap error:", err));
+                }
+            }
+        } catch (notifErr) {
+            console.error("Error sending swap notification:", notifErr);
+        }
 
         return NextResponse.json({ message: "Permintaan tukar shift berhasil diajukan!" }, { status: 201 });
     } catch (error: any) {

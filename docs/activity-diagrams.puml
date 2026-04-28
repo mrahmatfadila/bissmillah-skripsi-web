@@ -1,0 +1,248 @@
+@startuml activity_login
+title Activity Diagram - Login
+|Pengguna (SPV/IT)|
+start
+:Buka Halaman Login;
+:Masukkan Email dan Password;
+:Klik Tombol Login;
+|Sistem|
+:Validasi Kredensial;
+if (Kredensial Valid?) then (Ya)
+  :Cek Peran (Role) Pengguna;
+  if (Role == IT Support?) then (Ya)
+    :Arahkan ke Dashboard IT Support;
+  else (Tidak)
+    :Arahkan ke Dashboard SPV Shop;
+  endif
+else (Tidak)
+  :Tampilkan Pesan Error;
+  |Pengguna (SPV/IT)|
+  :Kembali ke Form Login;
+endif
+stop
+@enduml
+
+@startuml activity_membuat_tiket
+title Activity Diagram - Membuat Tiket (SPV)
+|SPV Shop|
+start
+:Buka Form Buat Tiket;
+:Isi Judul, Deskripsi, Kategori;
+:Isi Kuesioner AHP (Dampak & Urgensi);
+:Upload Lampiran (Opsional);
+:Klik "Kirim Tiket";
+|Sistem|
+:Hitung Skor AHP & Tentukan Prioritas;
+:Simpan Data Tiket ke Database;
+:Kirim Notifikasi ke IT Support & SPV;
+|SPV Shop|
+:Melihat Pesan Sukses;
+stop
+@enduml
+
+@startuml activity_melihat_tiket_saya
+title Activity Diagram - Melihat Tiket Saya (SPV)
+|SPV Shop|
+start
+:Buka Menu "Tiket Saya";
+|Sistem|
+:Ambil Data Tiket milik SPV dari Database;
+:Tampilkan Daftar Tiket;
+|SPV Shop|
+:Pilih Salah Satu Tiket;
+|Sistem|
+:Tampilkan Detail Tiket;
+stop
+@enduml
+
+@startuml activity_melihat_semua_tiket
+title Activity Diagram - Melihat Semua Tiket (IT)
+|IT Support|
+start
+:Buka Menu "Semua Tiket";
+|Sistem|
+:Ambil Semua Data Tiket dari Database;
+:Tampilkan Daftar Tiket (Filter/Sorting jika ada);
+|IT Support|
+:Pilih Salah Satu Tiket;
+|Sistem|
+:Tampilkan Detail Tiket;
+stop
+@enduml
+
+@startuml activity_update_status
+title Activity Diagram - Update Status Tiket (IT)
+|IT Support|
+start
+:Pilih Tiket dari Daftar "Semua Tiket";
+:Ubah Pilihan Status pada Dropdown;
+|Sistem|
+:Otomatis Menyimpan Perubahan ke Database;
+:Catat Riwayat Perubahan (Log);
+:Kirim Notifikasi ke SPV & IT Support;
+|IT Support|
+:Melihat Pop-up (Toast) Update Berhasil;
+stop
+@enduml
+
+@startuml activity_assign_tiket
+title Activity Diagram - Assign Tiket (IT)
+|IT Support|
+start
+:Pilih Tiket dari Daftar "Semua Tiket";
+:Ubah "Penerima Tugas" pada Dropdown;
+|Sistem|
+:Update field Assignee pada Tiket;
+:Otomatis Ubah Status Tiket menjadi "In Progress";
+:Kirim Notifikasi Penugasan ke Agen terkait;
+|IT Support|
+:Melihat Pop-up (Toast) Update Berhasil;
+stop
+@enduml
+
+@startuml activity_menutup_tiket
+title Activity Diagram - Menutup Tiket (IT)
+|IT Support|
+start
+:Pilih Tiket dari Daftar "Semua Tiket";
+:Ubah Status pada Dropdown menjadi "Resolved" atau "Closed";
+|Sistem|
+:Otomatis Menyimpan Status ke Database;
+:Kirim Notifikasi Penutupan ke SPV & IT Support;
+|IT Support|
+:Tiket selesai diproses;
+stop
+@enduml
+
+@startuml activity_komentar_lampiran
+title Activity Diagram - Komentar & Lampiran
+|Pengguna (SPV / IT)|
+start
+:Buka Detail Tiket;
+:Ketik Komentar di Kolom Balasan;
+:Pilih File Lampiran (Opsional);
+:Klik "Kirim Balasan";
+|Sistem|
+:Simpan Komentar & File ke Database;
+:Kirim Notifikasi ke Pihak Lawan (SPV/IT);
+:Segarkan Tampilan Percakapan;
+|Pengguna (SPV / IT)|
+:Melihat Komentar muncul di Timeline;
+stop
+@enduml
+
+@startuml activity_kelola_kb
+title Activity Diagram - Kelola Knowledge Base (IT)
+|IT Support|
+start
+:Buka Menu Knowledge Base;
+:Klik "Tambah Artikel Baru";
+:Isi Judul, Kategori, dan Konten Artikel;
+:Klik "Simpan";
+|Sistem|
+:Simpan Artikel ke Database;
+:Tampilkan Pesan Sukses;
+|IT Support|
+:Melihat Artikel Baru di Daftar;
+stop
+@enduml
+
+@startuml activity_membaca_kb
+title Activity Diagram - Membaca Knowledge Base
+|Pengguna (SPV / IT)|
+start
+:Buka Menu Knowledge Base;
+|Sistem|
+:Tampilkan Daftar Artikel;
+|Pengguna (SPV / IT)|
+:Ketik Kata Kunci di Kolom Pencarian;
+|Sistem|
+:Filter Artikel sesuai Kata Kunci;
+|Pengguna (SPV / IT)|
+:Klik Judul Artikel;
+|Sistem|
+:Tampilkan Isi/Detail Artikel;
+stop
+@enduml
+
+@startuml activity_menerima_notifikasi
+title Activity Diagram - Menerima Notifikasi
+|Sistem|
+start
+:Ada Trigger (Tiket Baru/Status Update/Komentar);
+:Simpan Data Notifikasi ke Database;
+:Kirim Email / Pesan WhatsApp (Sesuai Pengaturan);
+|Pengguna (SPV / IT)|
+:Melihat Indikator Lonceng Berubah / Menerima Email;
+:Klik Ikon Lonceng / Buka Link Email;
+|Sistem|
+:Arahkan Pengguna ke Detail Tiket Terkait;
+stop
+@enduml
+
+@startuml activity_melihat_jadwal_shift
+title Activity Diagram - Melihat Kalender Shift (IT)
+|IT Support|
+start
+:Buka Menu "Kalender Shift";
+|Sistem|
+:Ambil Data Jadwal dari Database;
+:Tampilkan Kalender Shift;
+|IT Support|
+:Melihat Jadwal Mandiri dan Tim;
+stop
+@enduml
+
+@startuml activity_tukar_shift
+title Activity Diagram - Tukar Shift (IT)
+|IT Support|
+start
+:Buka Menu "Tukar Shift";
+:Isi Data Diri (Nama, Shift Asli, Tanggal Shift);
+:Isi Data Rekan (Nama, Shift Rekan, Tanggal Shift Rekan);
+:Isi Alasan Tukar (Opsional);
+:Klik "Ajukan Permintaan Tukar Shift";
+|Sistem|
+:Simpan Status Pengajuan (Pending);
+:Kirim Notifikasi ke Rekan Kerja / Admin;
+stop
+@enduml
+
+@startuml activity_kelola_kriteria_ahp
+title Activity Diagram - Kelola Kriteria AHP (IT/Admin)
+|IT Support (Admin)|
+start
+:Buka Menu "Konfigurasi AHP";
+|Sistem|
+:Tampilkan Kriteria dan Matriks Perbandingan;
+|IT Support (Admin)|
+:Tambah/Edit/Hapus Kriteria (Bagian 1);
+:Bandingkan Kepentingan antar Kriteria menggunakan Skala 1-9 Saaty (Bagian 2);
+:Klik "Hitung Bobot AHP";
+|Sistem|
+:Hitung Bobot Kriteria dan Consistency Ratio (CR);
+|IT Support (Admin)|
+:Mengecek Hasil (Valid jika CR <= 0.1);
+:Klik "Simpan Konfigurasi AHP";
+|Sistem|
+:Simpan Kriteria dan Bobot ke Database;
+:Tampilkan Pop-up Pesan Sukses;
+stop
+@enduml
+
+@startuml activity_kelola_pengguna
+title Activity Diagram - Kelola Pengguna (IT/Admin)
+|IT Support (Admin)|
+start
+:Buka Menu "Kelola Pengguna";
+|Sistem|
+:Tampilkan Daftar Pengguna;
+|IT Support (Admin)|
+:Klik tombol "Add User" atau ikon "Edit";
+:Isi/Ubah Form (NIK, Nama, Email, Password, Role, Departemen, Lokasi);
+:Klik "Create User" atau "Update User";
+|Sistem|
+:Simpan Perubahan ke Database;
+:Tampilkan Pop-up (Toast) Berhasil;
+stop
+@enduml

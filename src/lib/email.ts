@@ -156,6 +156,43 @@ export class EmailService {
         await this.sendNotification(toEmails, subject, html, mailAttachments);
     }
 
+    static async notifyTicketCreatedForUser(ticket: any, toEmail: string, userName: string) {
+        const settings = await getSystemSettingsAsync();
+        if (!settings.notification?.notifyOnCreate) return;
+
+        const subject = `[Tiket Berhasil Dibuat] ${ticket.ticketNumber} - ${ticket.title}`;
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                <div style="background-color: #10b981; color: white; padding: 20px; text-align: center;">
+                    <h2 style="margin: 0; font-size: 24px;">Tiket Anda Berhasil Dibuat</h2>
+                    <p style="margin: 5px 0 0; opacity: 0.9;">No. ${ticket.ticketNumber}</p>
+                </div>
+                <div style="padding: 20px; background-color: #f8fafc;">
+                    <p style="color: #334155; font-size: 16px;">Halo <strong>${userName}</strong>,</p>
+                    <p style="color: #475569;">Terima kasih telah menghubungi kami. Tiket Anda dengan detail berikut telah kami terima dan akan segera ditindaklanjuti oleh tim IT Support.</p>
+                    
+                    <div style="background: white; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 10px 0; color: #1e293b;">Topik: ${ticket.title}</h4>
+                        <p style="color: #64748b; margin: 0 0 5px 0; font-size: 14px;"><strong>Kategori:</strong> ${ticket.category || 'N/A'}</p>
+                        <p style="color: #64748b; margin: 0; font-size: 14px;"><strong>Prioritas:</strong> ${ticket.priority || 'MEDIUM'}</p>
+                    </div>
+                    
+                    <div style="margin-top: 20px; text-align: center;">
+                        <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/tickets/${ticket.id}" 
+                           style="display: inline-block; background-color: #10b981; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: 600;">
+                           Pantau Status Tiket
+                        </a>
+                    </div>
+                </div>
+                <div style="background-color: #f1f5f9; padding: 15px; text-align: center; color: #64748b; font-size: 12px;">
+                    Sistem IT Ticketing Support &copy; ${new Date().getFullYear()}
+                </div>
+            </div>
+        `;
+
+        await this.sendNotification(toEmail, subject, html);
+    }
+
     static async notifyTicketAssigned(ticket: any, assigneeName: string, assignedByName: string) {
         const settings = await getSystemSettingsAsync();
         if (!settings.notification?.notifyOnAssign) return;
@@ -303,5 +340,39 @@ export class EmailService {
         `;
 
         await this.sendNotification(recipients, subject, html);
+    }
+
+    static async notifyShiftSwapRequest(targetEmail: string, targetName: string, requesterName: string, targetDate: string, requesterDate: string) {
+        const settings = await getSystemSettingsAsync();
+        if (!settings.notification?.emailEnabled) return;
+
+        const subject = `[Tukar Shift] Permintaan Tukar Shift dari ${requesterName}`;
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                <div style="background-color: #8b5cf6; color: white; padding: 20px; text-align: center;">
+                    <h2 style="margin: 0; font-size: 24px;">Permintaan Tukar Shift</h2>
+                </div>
+                <div style="padding: 20px; background-color: #f8fafc;">
+                    <p style="color: #334155; font-size: 16px;">Halo <strong>${targetName}</strong>,</p>
+                    <p style="color: #475569;">Rekan Anda <strong>${requesterName}</strong> mengajukan permintaan tukar shift kerja dengan detail berikut:</p>
+                    
+                    <div style="background: white; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                        <ul style="color: #475569; padding-left: 20px;">
+                            <li><strong>Jadwal Anda:</strong> ${targetDate}</li>
+                            <li><strong>Jadwal Pengaju:</strong> ${requesterDate}</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-top: 20px; text-align: center;">
+                        <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard/settings/schedule/swap" 
+                           style="display: inline-block; background-color: #8b5cf6; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: 600;">
+                           Lihat & Proses Pengajuan
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        await this.sendNotification(targetEmail, subject, html);
     }
 }

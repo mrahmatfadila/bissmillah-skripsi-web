@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Filter, Calendar, MoreVertical, Loader2, Eye, MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useSystemSettings } from "@/components/settings-provider";
+import { translateStatus } from "@/lib/utils";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -120,11 +121,12 @@ export function IssueTable({ tickets: allTickets, totalCount }: IssueTableProps)
                         className="h-8 px-3 text-xs border border-border rounded-md bg-background focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                         <option value="ALL">Semua Status</option>
-                        <option value="OPEN">Open</option>
-                        <option value="IN_PROGRESS">In Progress</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="RESOLVED">Resolved</option>
-                        <option value="CLOSED">Closed</option>
+                        <option value="OPEN">Terbuka</option>
+                        <option value="IN_PROGRESS">Di Proses</option>
+                        <option value="PENDING">Tertunda</option>
+                        <option value="RESOLVED">Selesai</option>
+                        <option value="CLOSED">Ditutup</option>
+                        <option value="CANCELLED">Dibatalkan</option>
                     </select>
                     <select
                         value={filterPriority}
@@ -211,7 +213,7 @@ export function IssueTable({ tickets: allTickets, totalCount }: IssueTableProps)
                                     </td>
                                     <td className="px-4 py-3">
                                         <Badge className={`${getStatusColor(ticket.status)} text-xs font-medium px-2.5 py-0.5 whitespace-nowrap`}>
-                                            {ticket.status.replace(/_/g, " ")}
+                                            {translateStatus(ticket.status)}
                                         </Badge>
                                     </td>
                                     <td className="px-4 py-3">

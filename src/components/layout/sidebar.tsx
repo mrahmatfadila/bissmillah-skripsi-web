@@ -44,7 +44,13 @@ export function Sidebar() {
         all: 0,
         unassigned: 0,
         mine: 0,
-        assigned: 0
+        assigned: 0,
+        open: 0,
+        in_progress: 0,
+        pending: 0,
+        resolved: 0,
+        closed: 0,
+        cancelled: 0
     });
 
     useEffect(() => {
@@ -170,12 +176,12 @@ export function Sidebar() {
                             <ChevronLeft className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <div className="space-y-1">
-                            <NavLink href="/dashboard/status/open" icon={divDot("#3b82f6")} label="Terbuka" />
-                            <NavLink href="/dashboard/status/in_progress" icon={divDot("#f59e0b")} label="Diproses" />
-                            <NavLink href="/dashboard/status/pending" icon={divDot("#8b5cf6")} label="Tertunda" />
-                            <NavLink href="/dashboard/status/resolved" icon={divDot("#10b981")} label="Selesai" />
-                            <NavLink href="/dashboard/status/closed" icon={divDot("#6b7280")} label="Ditutup" />
-                            <NavLink href="/dashboard/status/cancelled" icon={divDot("#ef4444")} label="Dibatalkan" />
+                            <NavLink href="/dashboard/status/open" icon={divDot("#3b82f6")} label="Terbuka" badge={ticketCounts.open > 0 ? ticketCounts.open : undefined} color="bg-blue-100 text-blue-700" />
+                            <NavLink href="/dashboard/status/in_progress" icon={divDot("#f59e0b")} label="Di Proses" badge={ticketCounts.in_progress > 0 ? ticketCounts.in_progress : undefined} color="bg-orange-100 text-orange-700" />
+                            <NavLink href="/dashboard/status/pending" icon={divDot("#8b5cf6")} label="Tertunda" badge={ticketCounts.pending > 0 ? ticketCounts.pending : undefined} color="bg-purple-100 text-purple-700" />
+                            <NavLink href="/dashboard/status/resolved" icon={divDot("#10b981")} label="Selesai" badge={ticketCounts.resolved > 0 ? ticketCounts.resolved : undefined} color="bg-emerald-100 text-emerald-700" />
+                            <NavLink href="/dashboard/status/closed" icon={divDot("#6b7280")} label="Ditutup" badge={ticketCounts.closed > 0 ? ticketCounts.closed : undefined} color="bg-gray-100 text-gray-700" />
+                            <NavLink href="/dashboard/status/cancelled" icon={divDot("#ef4444")} label="Dibatalkan" badge={ticketCounts.cancelled > 0 ? ticketCounts.cancelled : undefined} color="bg-red-100 text-red-700" />
                         </div>
                     </div>
                 )}
