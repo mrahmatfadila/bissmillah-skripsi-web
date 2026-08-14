@@ -89,13 +89,6 @@ erDiagram
         DateTime updatedAt
     }
 
-    RolePermission {
-        String id PK
-        Role role "Unique Enum"
-        String permissions "JSON String"
-        DateTime createdAt
-        DateTime updatedAt
-    }
 ```
 
 ## Enum Types

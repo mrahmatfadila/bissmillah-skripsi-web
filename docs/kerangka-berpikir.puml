@@ -1,0 +1,22 @@
+@startuml KerangkaBerpikir
+skinparam linetype ortho
+skinparam rectangle {
+    BackgroundColor White
+    BorderColor Black
+    Shadowing false
+    RoundCorner 15
+}
+
+rectangle "**MASALAH (PROBLEM)**\n\n1. Penanganan tiket keluhan/masalah IT belum terstruktur dan lambat.\n2. Penentuan prioritas pengerjaan tiket masih subjektif dan rentan tidak tepat sasaran.\n3. Sulitnya melacak riwayat penyelesaian masalah terdahulu.\n4. Manajemen jadwal shift dan tukar shift tim IT Support belum terintegrasi." as masalah
+
+rectangle "**PENDEKATAN & METODE (APPROACH)**\n\n1. Penerapan Metode AHP (Analytical Hierarchy Process) untuk pembobotan\n    kriteria dan penentuan prioritas tiket secara objektif & otomatis.\n2. Pendekatan Aplikasi Berbasis Web (Web-Based Application)." as metode
+
+rectangle "**PENGEMBANGAN SISTEM (SYSTEM DEVELOPMENT)**\n\nPerancangan Sistem IT Ticketing Support (Next.js & PostgreSQL) dengan fitur:\n- Modul Manajemen Tiket Terintegrasi\n- Kalkulasi Prioritas Otomatis menggunakan Algoritma AHP\n- Modul Knowledge Base (Basis Pengetahuan)\n- Manajemen Jadwal & Fitur Tukar Shift (Shift Swap)\n- Notifikasi Email Otomatis" as sistem
+
+rectangle "**HASIL (EXPECTED RESULT)**\n\n1. Mempercepat proses SLA (Service Level Agreement) penanganan masalah IT.\n2. Prioritas penanganan keluhan menjadi jauh lebih objektif, presisi, dan terukur.\n3. Terdokumentasinya solusi pemecahan masalah melalui fitur Knowledge Base.\n4. Memudahkan manajerial pembagian waktu dan jadwal teknisi IT." as hasil
+
+masalah --> metode
+metode --> sistem
+sistem --> hasil
+
+@enduml

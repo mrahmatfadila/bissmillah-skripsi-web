@@ -15,6 +15,7 @@ interface ArticleCardProps {
         content: string;
         category: string;
         createdAt: Date;
+        tags?: string | null;
         author: {
             name: string | null;
             image: string | null;
@@ -25,9 +26,12 @@ interface ArticleCardProps {
 export function ArticleCard({ article }: ArticleCardProps) {
     const categoryColors: Record<string, string> = {
         'IT_SUPPORT': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-        'SECURITY': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-        'FINANCE': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
         'GENERAL': 'bg-muted text-muted-foreground'
+    };
+
+    const categoryLabels: Record<string, string> = {
+        'IT_SUPPORT': 'IT Support',
+        'GENERAL': 'Supervisor Shop'
     };
 
     const { formatDate } = useSystemSettings();
@@ -40,7 +44,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
                 <CardHeader className="pb-3">
                     <div className="flex justify-between items-center mb-3">
                         <Badge variant="secondary" className={cn("font-semibold rounded-md px-2.5 py-1", categoryColors[article.category] || categoryColors.GENERAL)}>
-                            {article.category.replace(/_/g, " ")}
+                            {categoryLabels[article.category] || article.category.replace(/_/g, " ")}
                         </Badge>
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
@@ -50,6 +54,15 @@ export function ArticleCard({ article }: ArticleCardProps) {
                     <CardTitle className="text-xl font-bold text-foreground group-hover:text-blue-600 transition-colors line-clamp-2">
                         {article.title}
                     </CardTitle>
+                    {article.tags && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                            {article.tags.split(',').map((tag, idx) => (
+                                <Badge key={idx} variant="outline" className="text-[10px] py-0.5 px-2 font-medium text-slate-500 border-slate-200 bg-slate-50 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-400">
+                                    #{tag.trim()}
+                                </Badge>
+                            ))}
+                        </div>
+                    )}
                 </CardHeader>
 
                 <CardContent className="flex-1 pb-4">

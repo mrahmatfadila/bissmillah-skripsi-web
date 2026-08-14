@@ -1,0 +1,140 @@
+@startuml ClassDiagram
+skinparam classAttributeIconSize 0
+hide circle
+
+class User {
+  id : String
+  nik : String
+  name : String
+  email : String?
+  password : String
+  role : Role
+  department : String?
+  location : String?
+  createdAt : DateTime
+  updatedAt : DateTime
+  image : String?
+  failedLoginAttempts : Int
+  lockedUntil : DateTime?
+  insert_data()
+  update_data()
+}
+
+class Ticket {
+  id : String
+  ticketNumber : String
+  title : String
+  description : String
+  status : TicketStatus
+  priority : TicketPriority
+  category : String?
+  ahpScore : Float?
+  createdAt : DateTime
+  updatedAt : DateTime
+  creatorId : String
+  assigneeId : String?
+  kbArticleId : String?
+  attachments : String[]
+  insert_data()
+  update_data()
+  pilih_ticket()
+}
+
+class Comment {
+  id : String
+  content : String
+  createdAt : DateTime
+  ticketId : String
+  authorId : String
+  attachments : String[]
+  insert_data()
+  update_data()
+}
+
+class KnowledgeBase {
+  id : String
+  title : String
+  content : String
+  category : String
+  tags : String?
+  createdAt : DateTime
+  updatedAt : DateTime
+  authorId : String
+  insert_data()
+  update_data()
+}
+
+class Notification {
+  id : String
+  userId : String
+  title : String
+  message : String
+  type : String
+  read : Boolean
+  link : String?
+  createdAt : DateTime
+  ticketId : String?
+  insert_data()
+  update_data()
+}
+
+class AHPCriteria {
+  id : String
+  name : String
+  weight : Float
+  description : String?
+  createdAt : DateTime
+  updatedAt : DateTime
+  insert_data()
+  update_data()
+}
+
+class ShiftSchedule {
+  id : String
+  date : DateTime
+  shift : String
+  agentName : String
+  createdAt : DateTime
+  updatedAt : DateTime
+  insert_data()
+  update_data()
+}
+
+class ShiftSwapRequest {
+  id : String
+  requesterName : String
+  requesterShift : String
+  requesterDate : DateTime
+  targetName : String
+  targetShift : String
+  targetDate : DateTime
+  reason : String?
+  status : String
+  approvedBy : String?
+  approvedAt : DateTime?
+  createdAt : DateTime
+  updatedAt : DateTime
+  insert_data()
+  update_data()
+  pilih_schedule()
+}
+' Relasi Antar Class (Asosiasi disamakan dengan ERD)
+User "1..1" -- "0..*" Ticket : Membuat
+User "0..1" -- "0..*" Ticket : Ditugaskan
+User "1..1" -- "0..*" Comment : Menulis
+User "1..1" -- "0..*" KnowledgeBase : Menyusun
+User "1..1" -- "0..*" Notification : Menerima
+
+Ticket "1..1" -- "0..*" Comment : Memiliki
+Ticket "1..1" -- "0..*" Notification : memicu
+
+KnowledgeBase "0..1" -- "0..*" Ticket : Referensi
+
+' Relasi untuk Shift & AHP (Disamakan dengan ERD)
+User "1..1" -- "0..*" ShiftSchedule : Memiliki_shift
+User "1..1" -- "0..*" ShiftSwapRequest : Mengajukan
+User "1..1" -- "0..*" ShiftSwapRequest : Ditargetkan
+Ticket "0..*" -- "0..*" AHPCriteria : Dinilai
+
+@enduml
+

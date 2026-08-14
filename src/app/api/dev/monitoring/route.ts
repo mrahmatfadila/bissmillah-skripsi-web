@@ -16,9 +16,9 @@ export async function GET() {
 
         const now = new Date();
 
-        // ── Fetch everything in parallel ────────────────────────────────
+        const { DEFAULT_PERMISSIONS } = await import('@/lib/permissions');
         const [
-            tickets, users, comments, kb, notifs, permissions,
+            tickets, users, comments, kb, notifs,
         ] = await Promise.all([
             prisma.ticket.findMany({
                 include: {
@@ -31,8 +31,8 @@ export async function GET() {
             prisma.comment.findMany({ select: { id: true, createdAt: true, ticketId: true, authorId: true } }),
             prisma.knowledgeBase.findMany({ select: { id: true, createdAt: true } }),
             prisma.notification.findMany({ select: { id: true, createdAt: true, read: true } }),
-            prisma.rolePermission.count(),
         ]);
+        const permissions = Object.keys(DEFAULT_PERMISSIONS).length;
 
         // ── Status counts ────────────────────────────────────────────────
         const statusCounts = {

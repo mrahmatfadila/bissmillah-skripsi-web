@@ -201,7 +201,7 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
                 <div className="flex-1 p-6 overflow-y-auto custom-scrollbar bg-white dark:bg-card">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-2 md:col-span-2">
-                            <Label htmlFor="title" className="text-slate-700 dark:text-slate-300 font-semibold">Judul Masalah</Label>
+                            <Label htmlFor="title" className="text-slate-700 dark:text-slate-300 font-semibold">Judul Masalah <span className="text-red-500">*</span></Label>
                             <Input
                                 id="title"
                                 placeholder="Misal: Printer lantai 2 tidak bisa connect ke laptop"
@@ -214,7 +214,7 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
                         {/* Category Field */}
                         {(isSupervisor || settings?.ticket?.requireCategory) && (
                             <div className="space-y-2">
-                                <Label htmlFor="category" className="text-slate-700 dark:text-slate-300 font-semibold">Kategori Departemen</Label>
+                                <Label htmlFor="category" className="text-slate-700 dark:text-slate-300 font-semibold">Kategori Departemen <span className="text-red-500">*</span></Label>
                                 <Select
                                     value={formData.category}
                                     onValueChange={(value) => setFormData({ ...formData, category: value })}
@@ -235,7 +235,7 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
 
                         {(settings?.ticket?.requirePriority && ahpCriteria.length === 0) && (
                             <div className="space-y-2">
-                                <Label htmlFor="priority" className="text-slate-700 dark:text-slate-300 font-semibold">Prioritas (Manual)</Label>
+                                <Label htmlFor="priority" className="text-slate-700 dark:text-slate-300 font-semibold">Prioritas (Manual) <span className="text-red-500">*</span></Label>
                                 <Select
                                     value={formData.priority}
                                     onValueChange={(value) => setFormData({ ...formData, priority: value })}
@@ -255,7 +255,7 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
                         )}
 
                         <div className="space-y-2 md:col-span-2">
-                            <Label htmlFor="description" className="text-slate-700 dark:text-slate-300 font-semibold">Deskripsi Detail</Label>
+                            <Label htmlFor="description" className="text-slate-700 dark:text-slate-300 font-semibold">Deskripsi Detail <span className="text-red-500">*</span></Label>
                             <Textarea
                                 id="description"
                                 className="flex min-h-[140px] w-full rounded-xl border border-input bg-background px-4 py-3 text-sm ring-offset-background placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-sm resize-none"

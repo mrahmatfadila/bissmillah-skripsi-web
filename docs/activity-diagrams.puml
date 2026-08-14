@@ -1,167 +1,100 @@
 @startuml activity_login
 title Activity Diagram - Login
-|Pengguna (SPV/IT)|
+|Pengguna (Supervisor/IT)|
 start
 :Buka Halaman Login;
-:Masukkan Email dan Password;
+:Masukkan Email/NIK & Password;
 :Klik Tombol Login;
 |Sistem|
 :Validasi Kredensial;
 if (Kredensial Valid?) then (Ya)
-  :Cek Peran (Role) Pengguna;
-  if (Role == IT Support?) then (Ya)
-    :Arahkan ke Dashboard IT Support;
-  else (Tidak)
-    :Arahkan ke Dashboard SPV Shop;
-  endif
+  :Buat Session & Cek Role;
+  :Arahkan ke Halaman Utama;
+  |Pengguna (Supervisor/IT)|
+  :Masuk ke Dashboard Utama;
 else (Tidak)
   :Tampilkan Pesan Error;
-  |Pengguna (SPV/IT)|
+  |Pengguna (Supervisor/IT)|
   :Kembali ke Form Login;
 endif
 stop
 @enduml
 
 @startuml activity_membuat_tiket
-title Activity Diagram - Membuat Tiket (SPV)
-|SPV Shop|
+title Activity Diagram - Membuat Tiket (Supervisor Shop)
+|Supervisor Shop|
 start
-:Buka Form Buat Tiket;
-:Isi Judul, Deskripsi, Kategori;
+:Akses Form Buat Tiket;
+:Isi Judul, Deskripsi, Kategori & Lokasi;
 :Isi Kuesioner AHP (Dampak & Urgensi);
-:Upload Lampiran (Opsional);
+:Upload Lampiran Bukti (Opsional);
 :Klik "Kirim Tiket";
 |Sistem|
-:Hitung Skor AHP & Tentukan Prioritas;
-:Simpan Data Tiket ke Database;
-:Kirim Notifikasi ke IT Support & SPV;
-|SPV Shop|
-:Melihat Pesan Sukses;
+if (Validasi Input?) then (Valid)
+  :Hitung Prioritas berdasarkan Nilai AHP;
+  :Simpan Tiket ke Database (Status: OPEN);
+  :Kirim Notifikasi Baru ke IT Support;
+  |Supervisor Shop|
+  :Menerima Pop-up Tiket Berhasil Dibuat;
+else (Tidak Valid)
+  |Sistem|
+  :Tampilkan Pesan Error Input;
+  |Supervisor Shop|
+  :Perbaiki Isian Form;
+endif
 stop
 @enduml
 
-@startuml activity_melihat_tiket_saya
-title Activity Diagram - Melihat Tiket Saya (SPV)
-|SPV Shop|
+@startuml activity_melihat_status_tiket
+title Activity Diagram - Melihat Status Tiket (Supervisor Shop)
+|Supervisor Shop|
 start
 :Buka Menu "Tiket Saya";
 |Sistem|
-:Ambil Data Tiket milik SPV dari Database;
-:Tampilkan Daftar Tiket;
-|SPV Shop|
-:Pilih Salah Satu Tiket;
+:Reload / Memuat Ulang Data Tiket;
+:Menampilkan Daftar Tiket (Termasuk Badge Status);
+|Supervisor Shop|
+:Gunakan Filter Status / Prioritas (Opsional);
 |Sistem|
-:Tampilkan Detail Tiket;
+:Saring & Urutkan Daftar Tiket;
+:Tampilkan Daftar Tiket Terfilter;
+|Supervisor Shop|
+:Melihat Status Tiket Terkini;
 stop
 @enduml
 
-@startuml activity_melihat_semua_tiket
-title Activity Diagram - Melihat Semua Tiket (IT)
-|IT Support|
+@startuml activity_diskusi_chat
+title Activity Diagram - Diskusi & Chat
+|Pengguna (Supervisor/IT)|
 start
-:Buka Menu "Semua Tiket";
-|Sistem|
-:Ambil Semua Data Tiket dari Database;
-:Tampilkan Daftar Tiket (Filter/Sorting jika ada);
-|IT Support|
-:Pilih Salah Satu Tiket;
-|Sistem|
-:Tampilkan Detail Tiket;
-stop
-@enduml
-
-@startuml activity_update_status
-title Activity Diagram - Update Status Tiket (IT)
-|IT Support|
-start
-:Pilih Tiket dari Daftar "Semua Tiket";
-:Ubah Pilihan Status pada Dropdown;
-|Sistem|
-:Otomatis Menyimpan Perubahan ke Database;
-:Catat Riwayat Perubahan (Log);
-:Kirim Notifikasi ke SPV & IT Support;
-|IT Support|
-:Melihat Pop-up (Toast) Update Berhasil;
-stop
-@enduml
-
-@startuml activity_assign_tiket
-title Activity Diagram - Assign Tiket (IT)
-|IT Support|
-start
-:Pilih Tiket dari Daftar "Semua Tiket";
-:Ubah "Penerima Tugas" pada Dropdown;
-|Sistem|
-:Update field Assignee pada Tiket;
-:Otomatis Ubah Status Tiket menjadi "In Progress";
-:Kirim Notifikasi Penugasan ke Agen terkait;
-|IT Support|
-:Melihat Pop-up (Toast) Update Berhasil;
-stop
-@enduml
-
-@startuml activity_menutup_tiket
-title Activity Diagram - Menutup Tiket (IT)
-|IT Support|
-start
-:Pilih Tiket dari Daftar "Semua Tiket";
-:Ubah Status pada Dropdown menjadi "Resolved" atau "Closed";
-|Sistem|
-:Otomatis Menyimpan Status ke Database;
-:Kirim Notifikasi Penutupan ke SPV & IT Support;
-|IT Support|
-:Tiket selesai diproses;
-stop
-@enduml
-
-@startuml activity_komentar_lampiran
-title Activity Diagram - Komentar & Lampiran
-|Pengguna (SPV / IT)|
-start
-:Buka Detail Tiket;
-:Ketik Komentar di Kolom Balasan;
+:Buka Detail Tiket (Tab Diskusi & Chat);
+:Ketik Pesan Balasan;
 :Pilih File Lampiran (Opsional);
-:Klik "Kirim Balasan";
+:Klik "Kirim";
 |Sistem|
-:Simpan Komentar & File ke Database;
-:Kirim Notifikasi ke Pihak Lawan (SPV/IT);
+:Simpan Komentar & Lampiran ke Database;
+:Kirim Notifikasi ke Lawan Bicara;
 :Segarkan Tampilan Percakapan;
-|Pengguna (SPV / IT)|
-:Melihat Komentar muncul di Timeline;
-stop
-@enduml
-
-@startuml activity_kelola_kb
-title Activity Diagram - Kelola Knowledge Base (IT)
-|IT Support|
-start
-:Buka Menu Knowledge Base;
-:Klik "Tambah Artikel Baru";
-:Isi Judul, Kategori, dan Konten Artikel;
-:Klik "Simpan";
-|Sistem|
-:Simpan Artikel ke Database;
-:Tampilkan Pesan Sukses;
-|IT Support|
-:Melihat Artikel Baru di Daftar;
+|Pengguna (Supervisor/IT)|
+:Melihat Komentar Baru di Timeline;
 stop
 @enduml
 
 @startuml activity_membaca_kb
 title Activity Diagram - Membaca Knowledge Base
-|Pengguna (SPV / IT)|
+|Pengguna (Supervisor/IT)|
 start
 :Buka Menu Knowledge Base;
+:Masukkan Kata Kunci Masalah;
 |Sistem|
-:Tampilkan Daftar Artikel;
-|Pengguna (SPV / IT)|
-:Ketik Kata Kunci di Kolom Pencarian;
+:Filter Artikel Relevan di Database;
+:Tampilkan Daftar Artikel Terkait;
+|Pengguna (Supervisor/IT)|
+:Pilih & Klik Judul Artikel;
 |Sistem|
-:Filter Artikel sesuai Kata Kunci;
-|Pengguna (SPV / IT)|
-:Klik Judul Artikel;
-|Sistem|
-:Tampilkan Isi/Detail Artikel;
+:Ambil & Tampilkan Isi Artikel Solusi;
+|Pengguna (Supervisor/IT)|
+:Membaca Artikel Solusi;
 stop
 @enduml
 
@@ -169,80 +102,187 @@ stop
 title Activity Diagram - Menerima Notifikasi
 |Sistem|
 start
-:Ada Trigger (Tiket Baru/Status Update/Komentar);
-:Simpan Data Notifikasi ke Database;
-:Kirim Email / Pesan WhatsApp (Sesuai Pengaturan);
-|Pengguna (SPV / IT)|
-:Melihat Indikator Lonceng Berubah / Menerima Email;
-:Klik Ikon Lonceng / Buka Link Email;
+:Deteksi Aksi (Tiket Baru/Update Status/Komentar);
+:Simpan Notifikasi ke Database;
+:Kirim Pesan WhatsApp / Email;
+:Perbarui Badge Lonceng Notifikasi di UI;
+|Pengguna (Supervisor/IT)|
+:Terima Alert WA/Email atau Lihat Badge Lonceng;
+:Klik Lonceng Notifikasi / Link Email;
 |Sistem|
 :Arahkan Pengguna ke Detail Tiket Terkait;
+|Pengguna (Supervisor/IT)|
+:Melihat Detail Tiket;
 stop
 @enduml
 
-@startuml activity_melihat_jadwal_shift
-title Activity Diagram - Melihat Kalender Shift (IT)
-|IT Support|
+@startuml activity_mengambil_tiket
+title Activity Diagram - Mengambil Tiket (IT Support (MIS))
+|IT Support (MIS)|
 start
-:Buka Menu "Kalender Shift";
+:Buka Antrean Tiket Masuk "Unassigned";
+:Pilih Tiket Baru;
+:Klik Tombol "Ambil Tiket";
 |Sistem|
-:Ambil Data Jadwal dari Database;
-:Tampilkan Kalender Shift;
-|IT Support|
-:Melihat Jadwal Mandiri dan Tim;
+if (Tiket Sudah Diambil?) then (Belum)
+  :Set Assignee = Teknisi & Status = IN_PROGRESS;
+  :Catat Log Klaim Tiket & Segarkan Antrean;
+  |IT Support (MIS)|
+  :Melihat Tiket Masuk ke Halaman Tugas Saya;
+else (Sudah)
+  |Sistem|
+  :Tampilkan Pesan Error Tiket Sudah Diambil;
+  |IT Support (MIS)|
+  :Kembali ke Antrean;
+endif
 stop
 @enduml
 
-@startuml activity_tukar_shift
-title Activity Diagram - Tukar Shift (IT)
-|IT Support|
+@startuml activity_melihat_tiket_tugas_saya
+title Activity Diagram - Melihat Tiket Tugas Saya (IT Support (MIS))
+|IT Support (MIS)|
 start
-:Buka Menu "Tukar Shift";
-:Isi Data Diri (Nama, Shift Asli, Tanggal Shift);
-:Isi Data Rekan (Nama, Shift Rekan, Tanggal Shift Rekan);
-:Isi Alasan Tukar (Opsional);
-:Klik "Ajukan Permintaan Tukar Shift";
+:Buka Menu "Tugas Saya";
 |Sistem|
-:Simpan Status Pengajuan (Pending);
-:Kirim Notifikasi ke Rekan Kerja / Admin;
+:Reload / Memuat Ulang Data Tiket Tugas Saya;
+:Urutkan Daftar Tiket berdasarkan Prioritas AHP;
+:Menampilkan Daftar Tiket (Termasuk Badge Status);
+|IT Support (MIS)|
+:Gunakan Filter Status / Prioritas (Opsional);
+|Sistem|
+:Saring & Urutkan Daftar Tiket;
+:Tampilkan Daftar Tiket Terfilter;
+|IT Support (MIS)|
+:Melihat Daftar Tiket Tugas Saya & Statusnya;
 stop
 @enduml
 
-@startuml activity_kelola_kriteria_ahp
-title Activity Diagram - Kelola Kriteria AHP (IT/Admin)
-|IT Support (Admin)|
+@startuml activity_mengubah_status_tiket
+title Activity Diagram - Mengubah Status Tiket (IT Support (MIS))
+|IT Support (MIS)|
 start
-:Buka Menu "Konfigurasi AHP";
+:Buka Detail Tiket di Halaman Tugas Saya;
+:Klik Pilihan Status Tiket;
+:Pilih Status Baru (Pending / Resolved / Closed);
 |Sistem|
-:Tampilkan Kriteria dan Matriks Perbandingan;
-|IT Support (Admin)|
-:Tambah/Edit/Hapus Kriteria (Bagian 1);
-:Bandingkan Kepentingan antar Kriteria menggunakan Skala 1-9 Saaty (Bagian 2);
-:Klik "Hitung Bobot AHP";
-|Sistem|
-:Hitung Bobot Kriteria dan Consistency Ratio (CR);
-|IT Support (Admin)|
-:Mengecek Hasil (Valid jika CR <= 0.1);
-:Klik "Simpan Konfigurasi AHP";
-|Sistem|
-:Simpan Kriteria dan Bobot ke Database;
-:Tampilkan Pop-up Pesan Sukses;
+:Simpan Status Baru & Tanggal Penyelesaian;
+:Catat Perubahan ke Log Riwayat Status;
+:Kirim Notifikasi Perubahan Status ke Pelapor;
+|IT Support (MIS)|
+:Melihat Toast Sukses Perubahan Status;
 stop
 @enduml
 
-@startuml activity_kelola_pengguna
-title Activity Diagram - Kelola Pengguna (IT/Admin)
-|IT Support (Admin)|
+@startuml activity_membuat_tutorial
+title Activity Diagram - Membuat Tutorial (IT Support (MIS))
+|IT Support (MIS)|
 start
-:Buka Menu "Kelola Pengguna";
+:Buka Detail Tiket Selesai (Resolved/Closed);
+:Klik Tombol "Buat Tutorial / Convert to KB";
+:Isi/Edit Form Artikel Solusi;
+:Klik "Simpan";
 |Sistem|
-:Tampilkan Daftar Pengguna;
-|IT Support (Admin)|
-:Klik tombol "Add User" atau ikon "Edit";
-:Isi/Ubah Form (NIK, Nama, Email, Password, Role, Departemen, Lokasi);
-:Klik "Create User" atau "Update User";
+:Validasi & Simpan Artikel KB Baru;
+:Hubungkan ID Artikel KB ke Riwayat Tiket;
+|IT Support (MIS)|
+:Melihat Artikel Baru Tampil di Knowledge Base;
+stop
+@enduml
+
+@startuml activity_konfigurasi_ahp
+title Activity Diagram - Konfigurasi AHP (IT Support (MIS))
+|IT Support (MIS)|
+start
+:Akses Menu Konfigurasi AHP;
+:Ubah Nilai Perbandingan Berpasangan;
+:Klik "Hitung Konsistensi";
 |Sistem|
-:Simpan Perubahan ke Database;
-:Tampilkan Pop-up (Toast) Berhasil;
+:Hitung Bobot AHP & Consistency Ratio (CR);
+:Tampilkan Hasil Konsistensi Ratio;
+if (Consistency Ratio <= 0.1?) then (Ya)
+  |IT Support (MIS)|
+  :Klik Simpan Pengaturan;
+  |Sistem|
+  :Simpan Bobot Kriteria Baru ke Database;
+  |IT Support (MIS)|
+  :Melihat Konfigurasi AHP Berhasil Disimpan;
+else (Tidak)
+  |IT Support (MIS)|
+  :Sesuaikan Kembali Nilai Perbandingan;
+endif
+stop
+@enduml
+
+@startuml activity_mengembalikan_tiket
+title Activity Diagram - Mengembalikan Tiket (IT Support (MIS))
+|IT Support (MIS)|
+start
+:Buka Detail Tiket Tugas Saya;
+:Klik Dropdown Penerima Tugas (Assignee);
+:Pilih "Unassigned" atau Teknisi Lain;
+:Klik Konfirmasi Pengalihan;
+|Sistem|
+:Ubah Assignee = Null / Teknisi Baru;
+if (Apakah Assignee Null?) then (Ya)
+  :Ubah Status Tiket = OPEN;
+else (Tidak)
+  :Tetapkan Status = IN_PROGRESS;
+endif
+:Catat Pengalihan Tiket di Riwayat Log;
+:Kirim Notifikasi ke Penanggung Jawab Baru;
+|IT Support (MIS)|
+:Melihat Tiket Keluar dari Halaman Tugas Saya;
+stop
+@enduml
+
+@startuml activity_melihat_laporan_analitik
+title Activity Diagram - Melihat Laporan Analitik (IT Support (MIS))
+|IT Support (MIS)|
+start
+:Buka Menu Laporan Analitik;
+:Pilih Filter Periode / Departemen (Opsional);
+|Sistem|
+:Query Data Agregasi SLA, AHP, & KPI;
+:Tampilkan Grafik & Statistik di UI;
+|IT Support (MIS)|
+:Membaca Grafik SLA, KPI Agen, & Tren Kategori;
+:Klik "Cetak / Ekspor PDF" (Opsional);
+|Sistem|
+:Konversi Halaman Grafik menjadi Berkas PDF;
+|IT Support (MIS)|
+:Menyimpan Berkas PDF Laporan Kinerja;
+stop
+@enduml
+
+@startuml activity_manajemen_user
+title Activity Diagram - Manajemen User (IT Support (MIS))
+|IT Support (MIS)|
+start
+:Akses Menu Manajemen User;
+switch (Aksi)
+case (Tambah)
+  :Isi Form User Baru: NIK, Nama, Email, Role, Dept;
+  :Klik Simpan;
+  |Sistem|
+  if (Validasi User?) then (Valid)
+    :Simpan Akun ke Database;
+  else (Tidak)
+    :Tampilkan Alert Kesalahan Input;
+  endif
+case (Edit)
+  |IT Support (MIS)|
+  :Ubah Data User / Klik Reset Sandi;
+  :Klik Simpan;
+  |Sistem|
+  :Update Data User ke Database;
+case (Hapus)
+  |IT Support (MIS)|
+  :Klik Nonaktifkan User;
+  :Konfirmasi Penonaktifan;
+  |Sistem|
+  :Update Akun Menjadi Nonaktif;
+endswitch
+|IT Support (MIS)|
+:Melihat Toast Sukses Perubahan User;
 stop
 @enduml

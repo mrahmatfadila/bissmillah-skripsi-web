@@ -18,6 +18,7 @@ export default function CreateArticlePage() {
     const [title, setTitle] = useState("");
     const [category, setCategory] = useState("");
     const [content, setContent] = useState("");
+    const [tags, setTags] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,7 +32,7 @@ export default function CreateArticlePage() {
             const res = await fetch("/api/kb/create", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, category, content }),
+                body: JSON.stringify({ title, category, content, tags }),
             });
 
             if (res.ok) {
@@ -73,11 +74,14 @@ export default function CreateArticlePage() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="IT_SUPPORT">IT Support</SelectItem>
-                                    <SelectItem value="SECURITY">Security</SelectItem>
-                                    <SelectItem value="FINANCE">Finance</SelectItem>
-                                    <SelectItem value="GENERAL">General</SelectItem>
+                                    <SelectItem value="GENERAL">Supervisor Shop</SelectItem>
                                 </SelectContent>
                             </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Tags (Pisahkan dengan koma)</label>
+                            <Input placeholder="Contoh: printer, kasir, macet, error" value={tags} onChange={e => setTags(e.target.value)} />
                         </div>
 
                         <div className="space-y-2">

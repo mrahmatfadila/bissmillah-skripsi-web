@@ -79,8 +79,61 @@ export async function DELETE(
             return NextResponse.json({ error: 'Cannot delete your own account' }, { status: 400 });
         }
 
-        await prisma.user.delete({
-            where: { id: params.id },
+        await prisma.$transaction(async (tx) => {
+            // 1. Articles unlinking & deleting
+            const userArticles = await tx.knowledgeBase.findMany({
+                where: { authorId: params.id },
+                select: { id: true }
+            });
+            const articleIds = userArticles.map(a => a.id);
+            if (articleIds.length > 0) {
+                await tx.ticket.updateMany({
+                    where: { kbArticleId: { in: articleIds } },
+                    data: { kbArticleId: null }
+                });
+                await tx.knowledgeBase.deleteMany({
+                    where: { id: { in: articleIds } }
+                });
+            }
+
+            // 2. Tickets created by the user
+            const createdTickets = await tx.ticket.findMany({
+                where: { creatorId: params.id },
+                select: { id: true }
+            });
+            const createdTicketIds = createdTickets.map(t => t.id);
+            if (createdTicketIds.length > 0) {
+                await tx.comment.deleteMany({
+                    where: { ticketId: { in: createdTicketIds } }
+                });
+                await tx.notification.deleteMany({
+                    where: { ticketId: { in: createdTicketIds } }
+                });
+                await tx.ticket.deleteMany({
+                    where: { id: { in: createdTicketIds } }
+                });
+            }
+
+            // 3. Tickets assigned to the user
+            await tx.ticket.updateMany({
+                where: { assigneeId: params.id },
+                data: { assigneeId: null }
+            });
+
+            // 4. Comments written by the user on other tickets
+            await tx.comment.deleteMany({
+                where: { authorId: params.id }
+            });
+
+            // 5. Notifications sent to the user
+            await tx.notification.deleteMany({
+                where: { userId: params.id }
+            });
+
+            // 6. Finally delete the user
+            await tx.user.delete({
+                where: { id: params.id }
+            });
         });
 
         return NextResponse.json({ message: 'User deleted successfully' });

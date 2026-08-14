@@ -9,8 +9,8 @@ datasource db {
 
 model User {
   id                  String          @id @default(cuid())
-  nik                 String?         @unique
-  name                String?
+  nik                 String          @unique
+  name                String
   email               String?         @unique
   password            String
   role                Role            @default(SUPERVISOR_SHOP)
@@ -83,14 +83,6 @@ model AHPCriteria {
   updatedAt   DateTime @updatedAt
 }
 
-model RolePermission {
-  id          String   @id @default(cuid())
-  role        Role     @unique
-  permissions String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
 model Notification {
   id        String   @id @default(cuid())
   userId    String
@@ -132,12 +124,6 @@ model ShiftSwapRequest {
   updatedAt      DateTime  @updatedAt
 }
 
-model SystemSetting {
-  id        String   @id @default("singleton")
-  data      String
-  updatedAt DateTime @updatedAt
-  updatedBy String?
-}
 
 enum Role {
   SUPER_ADMIN

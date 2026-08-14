@@ -26,21 +26,14 @@ export default async function KnowledgeBasePage({ searchParams }: PageProps) {
 
     // Role-based filtering
     const role = session.user.role;
-    if (role === 'STAFF' || role === 'SUPERVISOR') {
-        // STAFF and SUPERVISOR can only see GENERAL articles
+    if (role === 'STAFF' || role === 'SUPERVISOR' || role === 'SUPERVISOR_SHOP') {
+        // STAFF, SUPERVISOR, and SUPERVISOR_SHOP can only see GENERAL articles
         whereClause.category = 'GENERAL';
-    } else if (role === 'FINANCE') {
-        whereClause.category = 'FINANCE';
-    } else if (role === 'SECURITY') {
-        whereClause.category = 'SECURITY';
     }
-    // IT_SUPPORT, SUPER_ADMIN, MANAGER see all articles
 
     if (category !== 'ALL') {
         // If user already has role restriction, this might conflict
-        // For FINANCE user selecting IT_SUPPORT category, they'll get 0 results (correct)
-        // For STAFF/SUPERVISOR, they can only see GENERAL regardless of filter
-        if (role === 'STAFF' || role === 'SUPERVISOR') {
+        if (role === 'STAFF' || role === 'SUPERVISOR' || role === 'SUPERVISOR_SHOP') {
             whereClause.category = 'GENERAL'; // Force GENERAL for these roles
         } else {
             whereClause.category = category;
@@ -50,7 +43,8 @@ export default async function KnowledgeBasePage({ searchParams }: PageProps) {
     if (query) {
         whereClause.OR = [
             { title: { contains: query, mode: 'insensitive' } },
-            { content: { contains: query, mode: 'insensitive' } }
+            { content: { contains: query, mode: 'insensitive' } },
+            { tags: { contains: query, mode: 'insensitive' } }
         ];
     }
 
@@ -60,7 +54,7 @@ export default async function KnowledgeBasePage({ searchParams }: PageProps) {
         include: { author: { select: { name: true, image: true } } }
     });
 
-    const isAuthorized = ['IT_SUPPORT', 'SUPER_ADMIN', 'MANAGER', 'FINANCE', 'SECURITY'].includes(session.user.role);
+    const isAuthorized = ['IT_SUPPORT', 'SUPER_ADMIN', 'MANAGER'].includes(session.user.role);
 
     return (
         <div className="min-h-screen bg-background pb-20">

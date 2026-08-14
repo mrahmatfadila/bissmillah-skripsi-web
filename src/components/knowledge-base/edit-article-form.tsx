@@ -91,9 +91,7 @@ export function EditArticleForm({ article }: EditArticleFormProps) {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="IT_SUPPORT">IT Support</SelectItem>
-                                <SelectItem value="SECURITY">Security</SelectItem>
-                                <SelectItem value="FINANCE">Finance</SelectItem>
-                                <SelectItem value="GENERAL">General</SelectItem>
+                                <SelectItem value="GENERAL">Supervisor Shop</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

@@ -5,9 +5,6 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
-
-
 export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
     try {
         const params = await props.params;
@@ -16,6 +13,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
 
         const { id } = params;
         const { title, category, content } = await request.json();
+        const cleanContent = typeof content === 'string' ? content.replace(/&nbsp;/g, ' ') : content;
 
         // Check if article exists and user has permission
         const existingArticle = await prisma.knowledgeBase.findUnique({
@@ -37,7 +35,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
             where: { id },
             data: {
                 title,
-                content,
+                content: cleanContent,
                 category
             }
         });

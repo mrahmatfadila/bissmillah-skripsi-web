@@ -35,7 +35,11 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        setError("NIK atau Password salah");
+        if (res.error === "CredentialsSignin") {
+          setError("NIK atau Password salah");
+        } else {
+          setError(res.error);
+        }
         setLoading(false);
       } else {
         // Fetch session to get user role

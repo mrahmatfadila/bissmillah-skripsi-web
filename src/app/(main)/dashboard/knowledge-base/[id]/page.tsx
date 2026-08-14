@@ -43,8 +43,19 @@ export default async function ArticleDetailPage(props: { params: Promise<{ id: s
 
             <Card>
                 <CardHeader className="space-y-4">
-                    <Badge className="w-fit" variant="secondary">{article.category}</Badge>
+                    <Badge className="w-fit" variant="secondary">
+                        {article.category === "IT_SUPPORT" ? "IT Support" : article.category === "GENERAL" ? "Supervisor Shop" : article.category.replace(/_/g, " ")}
+                    </Badge>
                     <CardTitle className="text-3xl font-bold text-foreground">{article.title}</CardTitle>
+                    {article.tags && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                            {article.tags.split(',').map((tag, idx) => (
+                                <Badge key={idx} variant="outline" className="text-[10px] py-0.5 px-2 font-medium text-slate-500 border-slate-200 bg-slate-50 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-400">
+                                    #{tag.trim()}
+                                </Badge>
+                            ))}
+                        </div>
+                    )}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                             <User className="w-4 h-4" />

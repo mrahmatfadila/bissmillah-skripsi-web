@@ -7,7 +7,6 @@ import { EmailService } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function PUT(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
@@ -46,18 +45,35 @@ export async function PUT(
         });
 
         if (updatedTicket.assigneeId && updatedTicket.assignee?.name) {
+            const assignNotifications = [];
 
-            // Add internal bell notification
-            await prisma.notification.create({
-                data: {
-                    userId: updatedTicket.assigneeId,
-                    title: `Tiket Assigned: #${updatedTicket.ticketNumber}`,
-                    message: `Anda mendapat tugas tiket baru dari ${session.user.name || "System"}`,
+            // Add internal bell notification for assignee (IT Support)
+            assignNotifications.push({
+                userId: updatedTicket.assigneeId,
+                title: `Tiket Assigned: #${updatedTicket.ticketNumber}`,
+                message: `Anda mendapat tugas tiket baru dari ${session.user.name || "System"}`,
+                type: "ASSIGNMENT",
+                link: `/tickets/${updatedTicket.id}`,
+                ticketId: updatedTicket.id
+            });
+
+            // Add internal bell notification for creator (Supervisor Shop) if they are not the assignee
+            if (updatedTicket.creatorId && updatedTicket.creatorId !== updatedTicket.assigneeId) {
+                assignNotifications.push({
+                    userId: updatedTicket.creatorId,
+                    title: `Tiket Diproses: #${updatedTicket.ticketNumber}`,
+                    message: `Tiket Anda telah ditugaskan kepada ${updatedTicket.assignee.name} oleh ${session.user.name || "System"}`,
                     type: "ASSIGNMENT",
                     link: `/tickets/${updatedTicket.id}`,
                     ticketId: updatedTicket.id
-                }
-            });
+                });
+            }
+
+            if (assignNotifications.length > 0) {
+                await prisma.notification.createMany({
+                    data: assignNotifications
+                });
+            }
 
             WhatsAppService.notifyTicketAssigned(updatedTicket, updatedTicket.assignee.name, session.user.name || "System")
                 .catch(err => console.error("WA assign error:", err));

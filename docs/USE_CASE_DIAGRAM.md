@@ -192,14 +192,8 @@
     <mxCell id="uc_usermgmt" value="Kelola Pengguna (Tambah/Edit/Hapus)" style="ellipse;fillColor=#f8cecc;strokeColor=#AE4132;fontSize=11;" vertex="1" parent="1">
       <mxGeometry x="1170" y="680" width="205" height="55" as="geometry" />
     </mxCell>
-    <mxCell id="uc_rolemgmt" value="Kelola Peran dan Izin Akses" style="ellipse;fillColor=#f8cecc;strokeColor=#AE4132;fontSize=11;" vertex="1" parent="1">
-      <mxGeometry x="1170" y="755" width="205" height="55" as="geometry" />
-    </mxCell>
     <mxCell id="uc_ahp" value="Konfigurasi AHP" style="ellipse;fillColor=#f8cecc;strokeColor=#AE4132;fontSize=11;" vertex="1" parent="1">
       <mxGeometry x="1170" y="830" width="205" height="55" as="geometry" />
-    </mxCell>
-    <mxCell id="uc_syssetting" value="Pengaturan Sistem" style="ellipse;fillColor=#f8cecc;strokeColor=#AE4132;fontSize=11;" vertex="1" parent="1">
-      <mxGeometry x="1170" y="905" width="205" height="55" as="geometry" />
     </mxCell>
     <mxCell id="uc_spam" value="Kelola Tiket Spam/Cancelled" style="ellipse;fillColor=#f8cecc;strokeColor=#AE4132;fontSize=11;" vertex="1" parent="1">
       <mxGeometry x="1170" y="980" width="205" height="55" as="geometry" />
@@ -284,9 +278,7 @@
     <!-- ASOSIASI — SUPER ADMIN -->
     <!-- ============================================================ -->
     <mxCell id="e60" value="" style="endArrow=none;" edge="1" source="a_admin" target="uc_usermgmt" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
-    <mxCell id="e61" value="" style="endArrow=none;" edge="1" source="a_admin" target="uc_rolemgmt" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
     <mxCell id="e62" value="" style="endArrow=none;" edge="1" source="a_admin" target="uc_ahp" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
-    <mxCell id="e63" value="" style="endArrow=none;" edge="1" source="a_admin" target="uc_syssetting" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
     <mxCell id="e64" value="" style="endArrow=none;" edge="1" source="a_admin" target="uc_spam" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
     <mxCell id="e65" value="" style="endArrow=none;" edge="1" source="a_admin" target="uc_actlog" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
     <mxCell id="e66" value="" style="endArrow=none;" edge="1" source="a_admin" target="uc_dataquality" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
@@ -375,9 +367,7 @@
 | UC-23 | Lihat Masalah EDC | Finance |
 | UC-24 | Lihat Masalah CCTV | Security |
 | UC-25 | Kelola Pengguna (Tambah/Edit/Hapus) | Super Admin |
-| UC-26 | Kelola Peran dan Izin Akses | Super Admin |
 | UC-27 | Konfigurasi AHP | Super Admin |
-| UC-28 | Pengaturan Sistem | Super Admin |
 | UC-29 | Kelola Tiket Spam/Cancelled | Super Admin |
 | UC-30 | Lihat Log Aktivitas | Super Admin |
 | UC-31 | Lihat Kualitas Data | Super Admin |

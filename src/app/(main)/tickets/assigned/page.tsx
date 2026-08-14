@@ -33,6 +33,7 @@ export default function AssignedTicketsPage() {
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState<string>('ALL');
     const [filterPriority, setFilterPriority] = useState<string>('ALL');
+    const [viewMode, setViewMode] = useState<'AHP_PRIORITY' | 'STATUS_GROUP'>('AHP_PRIORITY');
     const { formatDate } = useSystemSettings();
 
     useEffect(() => {
@@ -56,9 +57,6 @@ export default function AssignedTicketsPage() {
         fetchTickets();
     }, []);
 
-    // Helper colors...
-    const getPriorityColor = (p: string) => p === "HIGH" ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-700";
-
     // Filter tickets
     const filteredTickets = tickets.filter(ticket => {
         const statusMatch = filterStatus === 'ALL' || ticket.status === filterStatus;
@@ -66,7 +64,41 @@ export default function AssignedTicketsPage() {
         return statusMatch && priorityMatch;
     });
 
-    // Group tickets by status
+    // Helper sorting function based on active status, AHP score (highest first), priority mapping, and creation date
+    const sortTicketsByAHP = (ticketList: Ticket[]) => {
+        const activeStatuses = ['OPEN', 'IN_PROGRESS', 'PENDING'];
+        
+        return [...ticketList].sort((a, b) => {
+            const isAActive = activeStatuses.includes(a.status);
+            const isBActive = activeStatuses.includes(b.status);
+            
+            // Prioritize active tickets over completed/cancelled ones
+            if (isAActive && !isBActive) return -1;
+            if (!isAActive && isBActive) return 1;
+            
+            // If both are active or both are completed, sort by AHP score (highest first)
+            const scoreA = a.ahpScore ?? 0;
+            const scoreB = b.ahpScore ?? 0;
+            if (scoreB !== scoreA) {
+                return scoreB - scoreA;
+            }
+            
+            // Priority weight order: CRITICAL -> HIGH -> MEDIUM -> LOW
+            const priorityWeight: Record<string, number> = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+            const pA = priorityWeight[a.priority] || 0;
+            const pB = priorityWeight[b.priority] || 0;
+            if (pB !== pA) {
+                return pB - pA;
+            }
+            
+            // Fallback to createdAt descending
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+    };
+
+    const sortedFilteredTickets = sortTicketsByAHP(filteredTickets);
+
+    // Group tickets by status (and sort them within each group)
     const groupedTickets = filteredTickets.reduce((acc, ticket) => {
         const status = ticket.status;
         if (!acc[status]) {
@@ -75,6 +107,11 @@ export default function AssignedTicketsPage() {
         acc[status].push(ticket);
         return acc;
     }, {} as Record<string, Ticket[]>);
+
+    // Sort tickets inside each status group
+    Object.keys(groupedTickets).forEach(status => {
+        groupedTickets[status] = sortTicketsByAHP(groupedTickets[status]);
+    });
 
     // Status order and labels
     const statusConfig = [
@@ -85,6 +122,89 @@ export default function AssignedTicketsPage() {
         { key: 'CLOSED', label: 'Ditutup', color: 'bg-gray-500', count: groupedTickets['CLOSED']?.length || 0 },
         { key: 'CANCELLED', label: 'Dibatalkan', color: 'bg-red-500', count: groupedTickets['CANCELLED']?.length || 0 },
     ];
+
+    const renderTicketCard = (ticket: Ticket) => {
+        const priorityColors: Record<string, string> = {
+            CRITICAL: "bg-red-600 text-white shadow-sm",
+            HIGH: "bg-red-500 text-white shadow-sm",
+            MEDIUM: "bg-orange-500 text-white shadow-sm",
+            LOW: "bg-green-500 text-white shadow-sm"
+        };
+        
+        const priorityBarColors: Record<string, string> = {
+            CRITICAL: "bg-red-600",
+            HIGH: "bg-red-500",
+            MEDIUM: "bg-orange-500",
+            LOW: "bg-green-500"
+        };
+
+        const statusColors: Record<string, string> = {
+            OPEN: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+            IN_PROGRESS: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+            PENDING: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+            CLOSED: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400",
+            CANCELLED: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+            RESOLVED: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+        };
+
+        return (
+            <Link key={ticket.id} href={`/tickets/${ticket.id}`} className="block h-full">
+                <Card className="hover:shadow-xl transition-all duration-300 border-border group cursor-pointer bg-card relative overflow-hidden h-full flex flex-col justify-between">
+                    {/* Left Priority Bar */}
+                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 transition-all group-hover:w-2 ${priorityBarColors[ticket.priority] || 'bg-slate-300'}`} />
+                    
+                    <div className="pl-2 flex-1 flex flex-col justify-between">
+                        <CardHeader className="flex flex-row flex-wrap items-start sm:items-center justify-between pb-2 gap-2 pl-4">
+                            <Badge variant="outline" className="font-mono">{ticket.id.slice(-6).toUpperCase()}</Badge>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Badge className={`whitespace-nowrap ${priorityColors[ticket.priority] || 'bg-slate-500'}`}>
+                                    {ticket.priority}
+                                </Badge>
+                                <Badge className={`whitespace-nowrap ${statusColors[ticket.status] || 'bg-slate-100 text-slate-700'}`}>
+                                    {translateStatus(ticket.status)}
+                                </Badge>
+                            </div>
+                        </CardHeader>
+                        
+                        <CardContent className="pl-4 pb-4 flex-1 flex flex-col justify-between">
+                            <div className="mb-4">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="font-semibold text-lg text-foreground line-clamp-1 group-hover:text-blue-600 transition-colors flex-1">
+                                        {ticket.title}
+                                    </h3>
+                                    {ticket.ahpScore !== null && ticket.ahpScore !== undefined && (
+                                        <div className="ml-2 flex items-center gap-1 bg-blue-500/10 px-2 py-1 rounded shrink-0">
+                                            <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">AHP</span>
+                                            <span className="text-xs font-bold text-blue-700 dark:text-blue-400">{Number(ticket.ahpScore).toFixed(1)}</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="mt-2">
+                                    <span className="text-xs font-semibold text-muted-foreground uppercase">Request Permasalahan:</span>
+                                    <p className="text-sm text-muted-foreground mt-1 line-clamp-3 bg-muted/50 p-2 rounded border-l-2 border-blue-400">
+                                        {ticket.description}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground border-t border-border pt-4 mt-auto">
+                                <div className="flex items-center gap-2">
+                                    <Avatar className="h-6 w-6">
+                                        <AvatarImage src={ticket.creator.image || `https://ui-avatars.com/api/?name=${ticket.creator.name}&background=random`} />
+                                        <AvatarFallback className="text-[10px] font-bold">
+                                            {ticket.creator.name?.substring(0, 2).toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <span className="truncate max-w-[120px] sm:max-w-[150px]">{ticket.creator.name}</span>
+                                </div>
+                                <span className="whitespace-nowrap">{formatDate(ticket.createdAt)}</span>
+                            </div>
+                        </CardContent>
+                    </div>
+                </Card>
+            </Link>
+        );
+    };
 
     return (
         <div className="bg-background min-h-screen p-4 md:p-8">
@@ -106,15 +226,27 @@ export default function AssignedTicketsPage() {
                 </div>
             </div>
 
-            {/* Filter Controls */}
-            <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 mb-6 bg-card p-4 rounded-lg border border-border">
+            {/* Filter & View Mode Controls */}
+            <div className="flex flex-col lg:flex-row flex-wrap items-start lg:items-center gap-4 mb-6 bg-card p-4 rounded-lg border border-border">
                 <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-foreground whitespace-nowrap">Tampilan:</span>
+                </div>
+                <select
+                    value={viewMode}
+                    onChange={(e) => setViewMode(e.target.value as 'AHP_PRIORITY' | 'STATUS_GROUP')}
+                    className="w-full lg:w-auto px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer font-medium"
+                >
+                    <option value="AHP_PRIORITY">Urutkan AHP (Prioritas Tertinggi)</option>
+                    <option value="STATUS_GROUP">Kelompokkan per Status</option>
+                </select>
+
+                <div className="flex items-center gap-2 lg:ml-4 border-l lg:pl-4 border-border">
                     <span className="text-sm font-medium text-foreground whitespace-nowrap">Filter:</span>
                 </div>
                 <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full sm:w-auto px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full lg:w-auto px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                 >
                     <option value="ALL">Semua Status</option>
                     <option value="OPEN">Terbuka</option>
@@ -127,7 +259,7 @@ export default function AssignedTicketsPage() {
                 <select
                     value={filterPriority}
                     onChange={(e) => setFilterPriority(e.target.value)}
-                    className="w-full sm:w-auto px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full lg:w-auto px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                 >
                     <option value="ALL">Semua Priority</option>
                     <option value="CRITICAL">Critical</option>
@@ -141,12 +273,12 @@ export default function AssignedTicketsPage() {
                             setFilterStatus('ALL');
                             setFilterPriority('ALL');
                         }}
-                        className="w-full sm:w-auto px-3 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap text-left sm:text-center"
+                        className="w-full lg:w-auto px-3 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap text-left lg:text-center"
                     >
                         Reset Filter
                     </button>
                 )}
-                <div className="sm:ml-auto w-full sm:w-auto text-sm text-muted-foreground whitespace-nowrap">
+                <div className="lg:ml-auto w-full lg:w-auto text-sm text-muted-foreground whitespace-nowrap">
                     Menampilkan <span className="font-bold text-foreground">{filteredTickets.length}</span> dari <span className="font-bold text-foreground">{tickets.length}</span> tiket
                 </div>
             </div>
@@ -158,6 +290,10 @@ export default function AssignedTicketsPage() {
             ) : filteredTickets.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-12 bg-card rounded-2xl border border-dashed border-border text-muted-foreground">
                     <p>{tickets.length === 0 ? 'Tidak ada tiket yang ditugaskan ditemukan.' : 'Tidak ada tiket yang sesuai dengan filter.'}</p>
+                </div>
+            ) : viewMode === 'AHP_PRIORITY' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {sortedFilteredTickets.map((ticket) => renderTicketCard(ticket))}
                 </div>
             ) : (
                 <div className="space-y-8">
@@ -173,67 +309,7 @@ export default function AssignedTicketsPage() {
                                     <span className="text-sm text-muted-foreground">({statusTickets.length} tiket)</span>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {statusTickets.map((ticket) => (
-                                        <Link key={ticket.id} href={`/tickets/${ticket.id}`}>
-                                            <Card className="hover:shadow-lg transition-all duration-300 border-border group cursor-pointer bg-card">
-                                                <CardHeader className="flex flex-row flex-wrap items-start sm:items-center justify-between pb-2 gap-2">
-                                                    <Badge variant="outline" className="font-mono">{ticket.id.slice(-6).toUpperCase()}</Badge>
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        <Badge className={`whitespace-nowrap ${ticket.priority === 'CRITICAL' ? 'bg-red-600 text-white' :
-                                                            ticket.priority === 'HIGH' ? 'bg-red-500 text-white' :
-                                                                ticket.priority === 'MEDIUM' ? 'bg-orange-500 text-white' :
-                                                                    'bg-green-500 text-white'
-                                                            }`}>
-                                                            {ticket.priority}
-                                                        </Badge>
-                                                        <Badge className={`whitespace-nowrap ${ticket.status === 'OPEN' ? 'bg-blue-100 text-blue-700' :
-                                                            ticket.status === 'IN_PROGRESS' ? 'bg-orange-100 text-orange-700' :
-                                                            ticket.status === 'PENDING' ? 'bg-purple-100 text-purple-700' :
-                                                            ticket.status === 'CLOSED' ? 'bg-gray-100 text-gray-700' :
-                                                            ticket.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
-                                                                    'bg-green-100 text-green-700'
-                                                            }`}>
-                                                            {translateStatus(ticket.status)}
-                                                        </Badge>
-                                                    </div>
-                                                </CardHeader>
-                                                <CardContent>
-                                                    <div className="mb-4">
-                                                        <div className="flex items-center justify-between mb-2">
-                                                            <h3 className="font-semibold text-lg text-foreground line-clamp-1 group-hover:text-blue-600 transition-colors flex-1">
-                                                                {ticket.title}
-                                                            </h3>
-                                                            {ticket.ahpScore !== null && ticket.ahpScore !== undefined && (
-                                                                <div className="ml-2 flex items-center gap-1 bg-blue-500/10 px-2 py-1 rounded">
-                                                                    <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">AHP</span>
-                                                                    <span className="text-xs font-bold text-blue-700 dark:text-blue-400">{Number(ticket.ahpScore).toFixed(1)}</span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="mt-2">
-                                                            <span className="text-xs font-semibold text-muted-foreground uppercase">Request Permasalahan:</span>
-                                                            <p className="text-sm text-muted-foreground mt-1 line-clamp-3 bg-muted/50 p-2 rounded border-l-2 border-blue-400">
-                                                                {ticket.description}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground border-t border-border pt-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <Avatar className="h-6 w-6">
-                                                                <AvatarImage src={ticket.creator.image || `https://ui-avatars.com/api/?name=${ticket.creator.name}&background=random`} />
-                                                                <AvatarFallback className="text-[10px] font-bold">
-                                                                    {ticket.creator.name?.substring(0, 2).toUpperCase()}
-                                                                </AvatarFallback>
-                                                            </Avatar>
-                                                            <span className="truncate max-w-[120px] sm:max-w-[150px]">{ticket.creator.name}</span>
-                                                        </div>
-                                                        <span className="whitespace-nowrap">{formatDate(ticket.createdAt)}</span>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        </Link>
-                                    ))}
+                                    {statusTickets.map((ticket) => renderTicketCard(ticket))}
                                 </div>
                             </div>
                         );

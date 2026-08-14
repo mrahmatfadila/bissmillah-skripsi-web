@@ -1,23 +1,41 @@
-import { prisma } from '@/lib/db';
+// Static default permissions for each role
+export const DEFAULT_PERMISSIONS: Record<string, string[]> = {
+    SUPER_ADMIN: [
+        "dashboard", "activity_log", "unassigned_tickets", "my_tickets",
+        "assigned_tickets", "spam_tickets", "status_filters", "departments",
+        "knowledge_base", "reports", "ahp_config", "user_management", "role_management",
+        "upload_schedule", "shift_schedule", "profile_settings", "dev_tools"
+    ],
+    IT_SUPPORT: [
+        "dashboard", "activity_log", "unassigned_tickets", "my_tickets",
+        "assigned_tickets", "spam_tickets", "status_filters", "departments",
+        "knowledge_base", "reports", "ahp_config", "user_management", "role_management",
+        "upload_schedule", "shift_schedule", "profile_settings"
+    ],
+    MANAGER: [
+        "dashboard", "my_tickets", "assigned_tickets", "status_filters",
+        "departments", "knowledge_base", "reports", "profile_settings"
+    ],
+    SUPERVISOR: ["my_tickets", "knowledge_base", "profile_settings"],
+    FINANCE: [
+        "unassigned_tickets", "my_tickets", "assigned_tickets", "spam_tickets",
+        "status_filters", "knowledge_base", "edc_issues", "profile_settings"
+    ],
+    STAFF: ["my_tickets", "knowledge_base", "profile_settings"],
+    SECURITY: [
+        "unassigned_tickets", "my_tickets", "assigned_tickets", "spam_tickets",
+        "status_filters", "knowledge_base", "cctv_issues", "profile_settings"
+    ],
+    SUPERVISOR_SHOP: [
+        "my_tickets", "knowledge_base", "profile_settings"
+    ],
+};
 
 /**
- * Get permissions for a specific role from database
+ * Get permissions for a specific role
  */
 export async function getRolePermissions(role: string): Promise<string[]> {
-    try {
-        const rolePermission = await prisma.rolePermission.findUnique({
-            where: { role: role as any },
-        });
-
-        if (!rolePermission) {
-            return [];
-        }
-
-        return JSON.parse(rolePermission.permissions);
-    } catch (error) {
-        console.error('Error fetching role permissions:', error);
-        return [];
-    }
+    return DEFAULT_PERMISSIONS[role] || [];
 }
 
 /**

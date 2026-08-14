@@ -193,18 +193,39 @@ UI --> SPV: Redirect ke Detail Tiket & Toast Sukses
 
 @startuml seq_terima_notifikasi
 title Sequence Diagram - Menerima Notifikasi
-actor "Pengguna (SPV/IT)" as User
-boundary "Email Client / Browser" as Client
-control "Sistem Ticketing" as System
-entity "Database" as DB
+actor "IT Support / Pengguna" as User
+boundary "Dashboard UI (Header / Lonceng)" as UI
+control "Proses Notifikasi" as Proses
+entity "Notification" as Notification
 
-System -> DB: Event Terjadi (Tiket Baru/Status/Assign)
-System -> DB: Simpan Notifikasi In-App
-System -> Client: Kirim Email Notifikasi
-Client --> User: Muncul Pop-up Email Baru
-User -> Client: Buka Email & Klik "Cek Detail Lengkap"
-Client -> System: Buka URL Tiket di Browser
-System --> User: Tampilkan Detail Tiket Terkait
+Note over Proses: Trigger Aksi Terjadi\n(Tiket Baru / Update Status / Komentar)
+
+Proses -> Notification: Simpan Data Notifikasi ke Database()
+Notification --> Proses: Konfirmasi Tersimpan()
+Proses -> Proses: Kirim Email & WhatsApp secara Asinkron()
+
+== Polling / Memuat Notifikasi di Client ==
+UI -> Proses: Fetch Notifications (GET /api/notifications)()
+Proses -> Notification: Query Notifikasi Aktif (Belum Dibaca)()
+Notification --> Proses: Return List Notifikasi()
+Proses --> UI: Return JSON Data()
+UI --> User: Tampilkan Badge Lonceng Merah (Pulsing)()
+
+== Membaca / Menindaklanjuti Notifikasi ==
+alt Klik Notifikasi di Dashboard UI
+  User -> UI: Klik Item Notifikasi di Dropdown()
+  UI -> Proses: Tandai Dibaca (POST /api/notifications/mark-read)()
+  Proses -> Notification: Update Status read = true()
+  Notification --> Proses: Konfirmasi Update()
+  Proses --> UI: Return Status Sukses()
+  UI -> UI: Redirect ke URL Detail Tiket()
+  UI --> User: Tampilkan Halaman Detail Tiket()
+else Buka Link dari Email / WhatsApp
+  User -> UI: Klik Link Tiket di Email / WhatsApp()
+  UI -> Proses: Request Detail Tiket (GET /tickets/[id])()
+  Proses --> UI: Return Halaman Detail Tiket()
+  UI --> User: Tampilkan Halaman Detail Tiket()
+end
 @enduml
 
 @startuml seq_tutup_tiket

@@ -2,15 +2,13 @@
 
 Dokumen ini berisi file XML dan panduan untuk membuat **Entity Relationship Diagram (ERD)** yang sesuai dengan basis data aktual (Prisma schema) di draw.io, dengan menggunakan representasi terstruktur (Entitas, Relasi Diamond, dan Kardinalitas) seperti format akademik Indonesia pada laporan Anda.
 
-## Penjelasan Relasi Entitas Penunjang (AHP, Role, Shift)
+## Penjelasan Relasi Entitas Penunjang (AHP, Shift)
 
 Secara fisik di database (`schema.prisma`), tabel-tabel ini tidak memiliki Foreign Key (FK) constraint langsung karena alasan berikut:
 1.  **ShiftSchedule & ShiftSwapRequest:** Menghubungkan nama agen menggunakan tipe data `String` biasa (`agentName`, `requesterName`, `targetName`) bukan ID referensial.
-2.  **RolePermission:** Berelasi secara tidak langsung menggunakan Enum `Role` yang ada pada model `User`.
-3.  **AHPCriteria:** Bobot kriteria dibaca langsung oleh sistem untuk menghitung `ahpScore` pada tiket melalui algoritma kode program.
+2.  **AHPCriteria:** Bobot kriteria dibaca langsung oleh sistem untuk menghitung `ahpScore` pada tiket melalui algoritma kode program.
 
 Namun, untuk keperluan laporan **Skripsi / Tugas Akhir**, seluruh entitas **wajib saling terhubung**. Oleh karena itu, ERD di bawah ini sudah ditambahkan **Hubungan Logis (Logical Relationship)** sebagai berikut:
-*   `User (1) - mengatur - RolePermission (1)` (Berdasarkan Role Enum)
 *   `User (1) - memiliki_shift - ShiftSchedule (M)` (Berdasarkan nama agen)
 *   `User (1) - mengajukan - ShiftSwapRequest (M)` (Sebagai pemohon)
 *   `User (1) - ditargetkan - ShiftSwapRequest (M)` (Sebagai target pertukaran)
@@ -84,10 +82,6 @@ Namun, untuk keperluan laporan **Skripsi / Tugas Akhir**, seluruh entitas **waji
       <mxGeometry x="900" y="980" width="180" height="140" as="geometry" />
     </mxCell>
 
-    <!-- RolePermission -->
-    <mxCell id="ent_rp" value="&lt;b&gt;RolePermission (Hak Akses)&lt;/b&gt;&lt;hr&gt;&lt;b&gt;id&lt;/b&gt; [PK]&lt;br&gt;role (Enum)&lt;br&gt;permissions (JSON)&lt;br&gt;createdAt&lt;br&gt;updatedAt" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#7b1fa2;fontColor=#4a148c;align=left;verticalAlign=top;spacingLeft=10;spacingTop=5;fontSize=11;" vertex="1" parent="1">
-      <mxGeometry x="50" y="20" width="180" height="130" as="geometry" />
-    </mxCell>
 
     <!-- ShiftSchedule -->
     <mxCell id="ent_schedule" value="&lt;b&gt;ShiftSchedule (Jadwal Shift)&lt;/b&gt;&lt;hr&gt;&lt;b&gt;id&lt;/b&gt; [PK]&lt;br&gt;date&lt;br&gt;shift&lt;br&gt;agentName&lt;br&gt;createdAt&lt;br&gt;updatedAt" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#7b1fa2;fontColor=#4a148c;align=left;verticalAlign=top;spacingLeft=10;spacingTop=5;fontSize=11;" vertex="1" parent="1">
@@ -99,10 +93,6 @@ Namun, untuk keperluan laporan **Skripsi / Tugas Akhir**, seluruh entitas **waji
       <mxGeometry x="50" y="980" width="200" height="250" as="geometry" />
     </mxCell>
 
-    <!-- SystemSetting -->
-    <mxCell id="ent_setting" value="&lt;b&gt;SystemSetting (Pengaturan)&lt;/b&gt;&lt;hr&gt;&lt;b&gt;id&lt;/b&gt; [PK]&lt;br&gt;data&lt;br&gt;updatedAt&lt;br&gt;updatedBy" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#7b1fa2;fontColor=#4a148c;align=left;verticalAlign=top;spacingLeft=10;spacingTop=5;fontSize=11;" vertex="1" parent="1">
-      <mxGeometry x="600" y="980" width="180" height="120" as="geometry" />
-    </mxCell>
 
     <!-- ============================================================ -->
     <!-- RELASI DIAMOND (Amber / Orange) -->
@@ -149,10 +139,6 @@ Namun, untuk keperluan laporan **Skripsi / Tugas Akhir**, seluruh entitas **waji
     </mxCell>
 
     <!-- ===== LOGICAL RELATIONS (NEW) ===== -->
-    <!-- mengatur (User -> RolePermission) -->
-    <mxCell id="rel_user_rp" value="mengatur" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff8e1;strokeColor=#ff8f00;fontColor=#ff6f00;fontStyle=1;align=center;fontSize=11;" vertex="1" parent="1">
-      <mxGeometry x="80" y="190" width="120" height="60" as="geometry" />
-    </mxCell>
 
     <!-- memiliki_shift (User -> ShiftSchedule) -->
     <mxCell id="rel_user_schedule" value="memiliki_shift" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff8e1;strokeColor=#ff8f00;fontColor=#ff6f00;fontStyle=1;align=center;fontSize=11;" vertex="1" parent="1">
@@ -250,13 +236,6 @@ Namun, untuk keperluan laporan **Skripsi / Tugas Akhir**, seluruh entitas **waji
     </mxCell>
 
     <!-- LOGICAL RELATION EDGES -->
-    <!-- User - mengatur - RolePermission -->
-    <mxCell id="edge_user_rp" value="" style="endArrow=none;html=1;rounded=0;exitX=0.5;exitY=0;entryX=0.5;entryY=1;strokeWidth=1.5;" edge="1" source="ent_user" target="rel_user_rp" parent="1">
-      <mxGeometry relative="1" as="geometry" />
-    </mxCell>
-    <mxCell id="edge_rp_user" value="" style="endArrow=none;html=1;rounded=0;exitX=0.5;exitY=0;entryX=0.5;entryY=1;strokeWidth=1.5;" edge="1" source="rel_user_rp" target="ent_rp" parent="1">
-      <mxGeometry relative="1" as="geometry" />
-    </mxCell>
 
     <!-- User - memiliki_shift - ShiftSchedule -->
     <mxCell id="edge_user_schedule" value="" style="endArrow=none;html=1;rounded=0;exitX=0.25;exitY=1;entryX=0;entryY=0.5;strokeWidth=1.5;" edge="1" source="ent_user" target="rel_user_schedule" parent="1">
@@ -349,13 +328,6 @@ Namun, untuk keperluan laporan **Skripsi / Tugas Akhir**, seluruh entitas **waji
       <mxGeometry x="710" y="270" width="20" height="20" as="geometry" />
     </mxCell>
 
-    <!-- NEW LOGICAL RELATION LABELS -->
-    <mxCell id="lbl_user_rp" value="M" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontStyle=1;fontColor=#01579b;" vertex="1" parent="1">
-      <mxGeometry x="150" y="270" width="20" height="20" as="geometry" />
-    </mxCell>
-    <mxCell id="lbl_rp_user" value="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontStyle=1;fontColor=#4a148c;" vertex="1" parent="1">
-      <mxGeometry x="150" y="160" width="20" height="20" as="geometry" />
-    </mxCell>
 
     <mxCell id="lbl_user_sched" value="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontStyle=1;fontColor=#01579b;" vertex="1" parent="1">
       <mxGeometry x="100" y="550" width="20" height="20" as="geometry" />

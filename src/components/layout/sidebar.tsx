@@ -150,16 +150,19 @@ export function Sidebar() {
                 )}
 
                 {/* Tickets */}
-                {hasAnyPermission(["unassigned_tickets", "my_tickets", "assigned_tickets", "spam_tickets"]) && (
+                {hasAnyPermission(["unassigned_tickets", "assigned_tickets", "spam_tickets", "my_tickets"]) && (
                     <div>
                         <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Tiket</h3>
                         <div className="space-y-1">
                             {hasPermission("unassigned_tickets") && (
-                                <NavLink href="/tickets/unassigned" icon={AlertCircle} label="Belum Ditugaskan" badge={ticketCounts.unassigned > 0 ? ticketCounts.unassigned : undefined} color="bg-destructive/10 text-destructive" />
+                                <NavLink href="/tickets/unassigned" icon={AlertCircle} label="Belum ditugaskan" badge={ticketCounts.unassigned > 0 ? ticketCounts.unassigned : undefined} color="bg-destructive/10 text-destructive" />
                             )}
-                            {hasPermission("my_tickets") && <NavLink href="/tickets/mine" icon={User} label="Tiket Saya" badge={ticketCounts.mine > 0 ? ticketCounts.mine : undefined} />}
-                            {hasPermission("assigned_tickets") && (
+                            {hasPermission("assigned_tickets") ? (
                                 <NavLink href="/tickets/assigned" icon={CheckSquare} label="Tugas Saya" />
+                            ) : (
+                                hasPermission("my_tickets") && (
+                                    <NavLink href="/tickets/mine" icon={CheckSquare} label="Tiket Saya" />
+                                )
                             )}
                             {hasPermission("spam_tickets") && (
                                 <NavLink href="/tickets/spam" icon={MessageSquare} label="Spam" />
@@ -177,19 +180,15 @@ export function Sidebar() {
                         </div>
                         <div className="space-y-1">
                             <NavLink href="/dashboard/status/open" icon={divDot("#3b82f6")} label="Terbuka" badge={ticketCounts.open > 0 ? ticketCounts.open : undefined} color="bg-blue-100 text-blue-700" />
-                            <NavLink href="/dashboard/status/in_progress" icon={divDot("#f59e0b")} label="Di Proses" badge={ticketCounts.in_progress > 0 ? ticketCounts.in_progress : undefined} color="bg-orange-100 text-orange-700" />
+                            <NavLink href="/dashboard/status/in_progress" icon={divDot("#f59e0b")} label="Diproses" badge={ticketCounts.in_progress > 0 ? ticketCounts.in_progress : undefined} color="bg-orange-100 text-orange-700" />
                             <NavLink href="/dashboard/status/pending" icon={divDot("#8b5cf6")} label="Tertunda" badge={ticketCounts.pending > 0 ? ticketCounts.pending : undefined} color="bg-purple-100 text-purple-700" />
                             <NavLink href="/dashboard/status/resolved" icon={divDot("#10b981")} label="Selesai" badge={ticketCounts.resolved > 0 ? ticketCounts.resolved : undefined} color="bg-emerald-100 text-emerald-700" />
                             <NavLink href="/dashboard/status/closed" icon={divDot("#6b7280")} label="Ditutup" badge={ticketCounts.closed > 0 ? ticketCounts.closed : undefined} color="bg-gray-100 text-gray-700" />
                             <NavLink href="/dashboard/status/cancelled" icon={divDot("#ef4444")} label="Dibatalkan" badge={ticketCounts.cancelled > 0 ? ticketCounts.cancelled : undefined} color="bg-red-100 text-red-700" />
+                            {hasPermission("departments") && (
+                                <NavLink href="/dashboard/dept/it-shop" icon={Headphones} label="Departement IT & Toko" />
+                            )}
                         </div>
-                    </div>
-                )}
-
-                {/* Departments */}
-                {hasPermission("departments") && (
-                    <div className="space-y-1">
-                        <NavLink href="/dashboard/dept/it-shop" icon={Headphones} label="Departemen IT & Toko" />
                     </div>
                 )}
 
@@ -236,27 +235,24 @@ export function Sidebar() {
                 )}
 
                 {/* Analytics */}
-                {(hasPermission("reports") || hasPermission("data_quality")) && (
+                {hasPermission("reports") && (
                     <div>
                         <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Analitik</h3>
                         <div className="space-y-1">
-                            {hasPermission("reports") && <NavLink href="/dashboard/analytics" icon={BarChart3} label="Laporan Analitik" />}
-                            {hasPermission("data_quality") && <NavLink href="/dashboard/data-quality" icon={Database} label="Kualitas Data" />}
+                            <NavLink href="/dashboard/analytics" icon={BarChart3} label="Laporan Analitik" />
                         </div>
                     </div>
                 )}
 
                 {/* Admin */}
-                {(hasPermission("ahp_config") || hasPermission("user_management") || hasPermission("role_management") || hasPermission("system_settings") || hasPermission("upload_schedule")) && (
+                {(hasPermission("ahp_config") || hasPermission("user_management")) && (
                     <div>
                         <div className="flex items-center justify-between px-3 mb-2 mt-4">
                             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Admin IT Support</h3>
                         </div>
                         <div className="space-y-1">
                             {hasPermission("ahp_config") && <NavLink href="/dashboard/settings/ahp" icon={Settings} label="Konfigurasi AHP" />}
-                            {hasPermission("ahp_config") && <NavLink href="/dashboard/settings/ahp/calculate" icon={BarChart3} label="Simulasi Perhitungan AHP" />}
                             {hasPermission("user_management") && <NavLink href="/dashboard/settings/users" icon={Users} label="Manajemen User" />}
-                            {hasPermission("system_settings") && <NavLink href="/dashboard/settings/system" icon={Settings} label="Pengaturan Sistem" />}
                         </div>
                     </div>
                 )}

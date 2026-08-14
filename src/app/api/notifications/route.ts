@@ -5,7 +5,6 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function GET(request: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -16,8 +15,7 @@ export async function GET(request: Request) {
         const notifications = await prisma.notification.findMany({
             where: {
                 userId: session.user.id,
-                read: false,
-                type: { not: 'COMMENT' }
+                read: false
             },
             orderBy: {
                 createdAt: 'desc'
