@@ -284,12 +284,21 @@ export function DashboardHeader() {
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="flex items-center space-x-3 hover:bg-transparent p-0">
                             <div className="text-right hidden md:block">
-                                <p className="text-sm font-semibold text-foreground">
-                                    {session?.user?.name || "User"}
-                                </p>
-                                <p className="text-xs text-muted-foreground capitalize">
-                                    {session?.user?.role?.replace("_", " ") || "Role"}
-                                </p>
+                                {session?.user?.name ? (
+                                    <>
+                                        <p className="text-sm font-semibold text-foreground">
+                                            {session.user.name}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground capitalize">
+                                            {session?.user?.role?.replace(/_/g, " ") || ""}
+                                        </p>
+                                    </>
+                                ) : (
+                                    <div className="space-y-1 py-0.5">
+                                        <div className="h-3.5 w-20 bg-muted/60 rounded animate-pulse" />
+                                        <div className="h-2.5 w-14 bg-muted/40 rounded animate-pulse ml-auto" />
+                                    </div>
+                                )}
                             </div>
                             <Avatar className="h-10 w-10 border-2 border-background shadow-sm ring-1 ring-border">
                                 <AvatarImage src={session?.user?.image || `https://ui-avatars.com/api/?name=${session?.user?.name}&background=16a34a&color=fff`} />
@@ -307,7 +316,7 @@ export function DashboardHeader() {
                             <Link href="/dashboard/preferences" prefetch={true} className="cursor-pointer w-full">Settings</Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={() => signOut()}>
+                        <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={() => signOut({ callbackUrl: "/" })}>
                             Log out
                         </DropdownMenuItem>
                     </DropdownMenuContent>

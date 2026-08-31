@@ -1,14 +1,21 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { DashboardHeaderWrapper as DashboardHeader } from "@/components/layout/dashboard-header-wrapper";
 import { MaintenanceBlock } from "@/components/maintenance-block";
 import { Footer } from "@/components/layout/footer";
 import { LiveShiftBanner } from "@/components/live-shift-banner";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+        redirect('/');
+    }
     return (
         <div className="h-full relative flex flex-col min-w-0 w-full overflow-x-hidden">
             <MaintenanceBlock>
