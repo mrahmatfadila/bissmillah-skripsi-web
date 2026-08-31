@@ -301,10 +301,10 @@ export function DashboardHeader() {
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                            <Link href="/dashboard/profile" className="cursor-pointer w-full">Profile</Link>
+                            <Link href="/dashboard/profile" prefetch={true} className="cursor-pointer w-full">Profile</Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                            <Link href="/dashboard/preferences" className="cursor-pointer w-full">Settings</Link>
+                            <Link href="/dashboard/preferences" prefetch={true} className="cursor-pointer w-full">Settings</Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={() => signOut()}>

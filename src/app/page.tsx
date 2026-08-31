@@ -20,7 +20,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Prefetch main destination routes for instant redirect after login
+    router.prefetch('/dashboard');
+    router.prefetch('/tickets/mine');
+    router.prefetch('/tickets/assigned');
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
