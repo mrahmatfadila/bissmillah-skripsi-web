@@ -79,13 +79,14 @@ export function Sidebar() {
             clearInterval(interval);
             window.removeEventListener('ticket-stats-refresh', handleRefresh);
         };
-    }, [pathname]);
+    }, []);
 
     const NavLink = ({ href, icon: Icon, label, badge, color }: any) => {
         const isActive = pathname === href;
         return (
             <Link
                 href={href}
+                prefetch={true}
                 className={cn(
                     "group flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
                     isActive

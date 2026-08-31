@@ -25,30 +25,113 @@ export default async function DashboardPage() {
         redirect('/tickets/mine');
     }
 
-    // 1. Basic Counts
-    const totalTickets = await prisma.ticket.count();
-    const myTickets = await prisma.ticket.count({
-        where: { assigneeId: session.user.id }
-    });
-    const myResolvedTickets = await prisma.ticket.count({
-        where: { assigneeId: session.user.id, status: 'RESOLVED' }
-    });
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    // 2. Recent Tickets - Fetch more for pagination
-    const recentTickets = await prisma.ticket.findMany({
-        take: 20, // Fetch 20 tickets for pagination (4 pages of 5)
-        orderBy: { createdAt: 'desc' },
-        include: {
-            creator: { select: { name: true, department: true, image: true } },
-            assignee: { select: { name: true, role: true, image: true } }
-        }
-    });
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    // 3. Status Distribution
-    const ticketsByStatusRaw = await prisma.ticket.groupBy({
-        by: ['status'],
-        _count: { status: true }
-    });
+    // Parallelize all independent database queries for maximum performance
+    const [
+        totalTickets,
+        myTickets,
+        myResolvedTickets,
+        recentTickets,
+        ticketsByStatusRaw,
+        ticketsByPriorityRaw,
+        topAgentsRaw,
+        deptTickets,
+        recentTrend,
+        resolvedTicketsMetrics,
+        responseMetrics
+    ] = await Promise.all([
+        // 1. Basic Counts
+        prisma.ticket.count(),
+        prisma.ticket.count({
+            where: { assigneeId: session.user.id }
+        }),
+        prisma.ticket.count({
+            where: { assigneeId: session.user.id, status: 'RESOLVED' }
+        }),
+        // 2. Recent Tickets
+        prisma.ticket.findMany({
+            take: 20,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                creator: { select: { name: true, department: true, image: true } },
+                assignee: { select: { name: true, role: true, image: true } }
+            }
+        }),
+        // 3. Status Distribution
+        prisma.ticket.groupBy({
+            by: ['status'],
+            _count: { status: true }
+        }),
+        // 4. Priority Distribution
+        prisma.ticket.groupBy({
+            by: ['priority'],
+            _count: { priority: true }
+        }),
+        // 5. Top Agents
+        prisma.ticket.groupBy({
+            by: ['assigneeId'],
+            where: {
+                assigneeId: { not: null },
+                updatedAt: { gte: thirtyDaysAgo },
+                status: { in: ['RESOLVED', 'CLOSED'] }
+            },
+            _count: {
+                assigneeId: true
+            },
+            orderBy: {
+                _count: {
+                    assigneeId: 'desc'
+                }
+            },
+            take: 5
+        }),
+        // 6. Department Stats
+        prisma.ticket.findMany({
+            select: {
+                creator: {
+                    select: { department: true }
+                }
+            }
+        }),
+        // 7. Trend Data (Last 7 Days)
+        prisma.ticket.findMany({
+            where: { createdAt: { gte: sevenDaysAgo } },
+            select: { createdAt: true }
+        }),
+        // 8. Performance Metrics Calculation
+        prisma.ticket.findMany({
+            where: {
+                status: { in: ['RESOLVED', 'CLOSED'] }
+            },
+            select: {
+                createdAt: true,
+                updatedAt: true
+            },
+            take: 50,
+            orderBy: { updatedAt: 'desc' }
+        }),
+        prisma.ticket.findMany({
+            where: {
+                comments: { some: {} }
+            },
+            select: {
+                createdAt: true,
+                creatorId: true,
+                comments: {
+                    take: 5,
+                    orderBy: { createdAt: 'asc' },
+                    select: { createdAt: true, authorId: true }
+                }
+            },
+            take: 50,
+            orderBy: { createdAt: 'desc' }
+        })
+    ]);
 
     const statusColors: any = {
         'OPEN': '#3b82f6',
@@ -65,12 +148,6 @@ export default async function DashboardPage() {
         color: statusColors[item.status] || '#cbd5e1'
     }));
 
-    // 4. Priority Distribution
-    const ticketsByPriorityRaw = await prisma.ticket.groupBy({
-        by: ['priority'],
-        _count: { priority: true }
-    });
-
     // Ensure accurate order
     const priorityOrder = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
     const ticketsByPriority = priorityOrder.map(p => {
@@ -78,35 +155,12 @@ export default async function DashboardPage() {
         return { name: p, value: found ? found._count.priority : 0 };
     }).filter(i => i.value > 0);
 
-
-    // 5. Top Agents (Resolved Count - Last 30 Days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const topAgentsRaw = await prisma.ticket.groupBy({
-        by: ['assigneeId'],
-        where: {
-            assigneeId: { not: null },
-            updatedAt: { gte: thirtyDaysAgo },
-            status: { in: ['RESOLVED', 'CLOSED'] }
-        },
-        _count: {
-            assigneeId: true
-        },
-        orderBy: {
-            _count: {
-                assigneeId: 'desc'
-            }
-        },
-        take: 5
-    });
-
-    // Fetch user details
+    // Fetch user details for top agents
     const agentIds = topAgentsRaw.map(a => a.assigneeId).filter(Boolean) as string[];
-    const agentsDetails = await prisma.user.findMany({
+    const agentsDetails = agentIds.length > 0 ? await prisma.user.findMany({
         where: { id: { in: agentIds } },
         select: { id: true, name: true, email: true, image: true }
-    });
+    }) : [];
 
     const topAgents = topAgentsRaw.map(item => {
         const detail = agentsDetails.find(u => u.id === item.assigneeId);
@@ -116,23 +170,6 @@ export default async function DashboardPage() {
             image: detail?.image || null,
             count: item._count.assigneeId
         };
-    });
-
-    // 6. Department Stats
-    // We need to aggregate tickets by creator's department
-    // Since we can't groupBy relation, we fetch user department counts effectively.
-    // Actually, simpler: Group users by department, and count assuming 1 user = N tickets?
-    // No. Accurate way: Fetch all tickets with select creator.department (heavy).
-    // Optimization: GroupBy on User (department) is for USERS per dept, not tickets.
-    // Let's stick to the "User Department" approximation for now or fetch aggregated if not too heavy.
-    // For now, let's just fetch Ticket counts by Department via raw query or simple aggregation if dataset is small.
-    // Given the constraints and likely small dataset for now, let's do:
-    const deptTickets = await prisma.ticket.findMany({
-        select: {
-            creator: {
-                select: { department: true }
-            }
-        }
     });
 
     const deptMap: Record<string, number> = {};
@@ -145,7 +182,7 @@ export default async function DashboardPage() {
         .map(([name, value]) => ({
             name,
             value,
-            fill: '#' + Math.floor(Math.random() * 16777215).toString(16) // Random color for now or map specific
+            fill: '#' + Math.floor(Math.random() * 16777215).toString(16)
         }))
         .sort((a, b) => b.value - a.value)
         .slice(0, 5);
@@ -154,17 +191,7 @@ export default async function DashboardPage() {
     const deptColors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444'];
     deptData.forEach((d, i) => d.fill = deptColors[i % deptColors.length]);
 
-
-    // 7. Trend Data (Last 7 Days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const recentTrend = await prisma.ticket.findMany({
-        where: { createdAt: { gte: sevenDaysAgo } },
-        select: { createdAt: true }
-    });
-
-    // Bucket by day
+    // Bucket trend by day
     const trendMap: Record<string, number> = {};
     recentTrend.forEach(t => {
         const day = t.createdAt.toISOString().split('T')[0];
@@ -173,27 +200,9 @@ export default async function DashboardPage() {
 
     // Convert to array expected by sparkline
     const trendData = Object.values(trendMap).map(v => ({ value: v }));
-    // Fill with previous mock if empty to avoid broken UI, or just empty
     const finalTrendData = trendData.length > 0 ? trendData : [{ value: 0 }, { value: 0 }, { value: 0 }];
 
-
-    // 8. Performance Metrics Calculation
-
-    // A. Average Resolution Time (Sample based)
-    const resolvedTicketsMetrics = await prisma.ticket.findMany({
-        where: {
-            status: { in: ['RESOLVED', 'CLOSED'] }
-        },
-        select: {
-            createdAt: true,
-            updatedAt: true
-        },
-        take: 50,
-        orderBy: { updatedAt: 'desc' }
-    });
-
     let resolutionTimeStr = "0 Jam";
-
     if (resolvedTicketsMetrics.length > 0) {
         const totalResolutionTime = resolvedTicketsMetrics.reduce((acc, t) => {
             return acc + (t.updatedAt.getTime() - t.createdAt.getTime());
@@ -210,24 +219,6 @@ export default async function DashboardPage() {
             resolutionTimeStr = `${Math.round(avgHours / 24)} Hari`;
         }
     }
-
-    // B. Average Response Speed (Sample based)
-    const responseMetrics = await prisma.ticket.findMany({
-        where: {
-            comments: { some: {} } // Tickets with comments
-        },
-        select: {
-            createdAt: true,
-            creatorId: true,
-            comments: {
-                take: 5, // Check first few to find non-author comment
-                orderBy: { createdAt: 'asc' },
-                select: { createdAt: true, authorId: true }
-            }
-        },
-        take: 50,
-        orderBy: { createdAt: 'desc' }
-    });
 
     let responseTimeStr = "0 Menit";
     let totalResponseTime = 0;
