@@ -21,10 +21,6 @@ export default function LoginPage() {
 
   useEffect(() => {
     setMounted(true);
-    // Prefetch main destination routes for instant redirect after login
-    router.prefetch('/dashboard');
-    router.prefetch('/tickets/mine');
-    router.prefetch('/tickets/assigned');
 
     if (status === "authenticated" && session?.user) {
       const role = (session.user as any)?.role;
@@ -45,7 +41,7 @@ export default function LoginPage() {
         window.location.href = '/tickets/mine';
       }
     }
-  }, [router, status, session]);
+  }, [status, session]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,38 +63,8 @@ export default function LoginPage() {
         }
         setLoading(false);
       } else {
-        // Fetch session to determine role-based redirect
-        let targetUrl = '/dashboard';
-        try {
-          const response = await fetch('/api/auth/session');
-          if (response.ok) {
-            const session = await response.json();
-            const role = session?.user?.role;
-
-            const rolesWithDashboard = [
-              'SUPER_ADMIN',
-              'IT_SUPPORT',
-              'ASSISTANT_MANAGER_IT',
-              'IT_DATA_ADMIN',
-              'MANAGER_SHOP',
-              'MANAGER_SAM',
-              'ASSISTANT_MANAGER_SAM'
-            ];
-
-            if (role === 'DEVELOPER') {
-              targetUrl = '/dev/logs';
-            } else if (role && rolesWithDashboard.includes(role)) {
-              targetUrl = '/dashboard';
-            } else if (role) {
-              targetUrl = '/tickets/mine';
-            }
-          }
-        } catch (e) {
-          console.error("Session lookup fallback", e);
-        }
-
-        // Use window.location.href to guarantee fresh session cookie delivery to Server Components
-        window.location.href = targetUrl;
+        // Success: hard redirect to let the server route appropriately
+        window.location.href = "/dashboard";
       }
     } catch (err) {
       setError("Terjadi kesalahan pada sistem");
