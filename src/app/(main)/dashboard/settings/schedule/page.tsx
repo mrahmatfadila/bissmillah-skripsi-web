@@ -50,7 +50,10 @@ export default function ScheduleUploadPage() {
         { code: "P", label: "Pagi", time: "06:00–15:00", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-800" },
         { code: "S", label: "Siang", time: "13:30–22:30", color: "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200 border border-blue-300 dark:border-blue-700" },
         { code: "M", label: "Malam", time: "21:30–06:30", color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-700" },
-        { code: "L", label: "Libur", time: "Hari Libur", color: "bg-gray-100 text-gray-600 dark:bg-gray-800/40 dark:text-gray-400 border border-gray-200 dark:border-gray-700" },
+        { code: "L", label: "Libur Mingguan", time: "Hari Libur (Off)", color: "bg-gray-100 text-gray-600 dark:bg-gray-800/40 dark:text-gray-400 border border-gray-200 dark:border-gray-700" },
+        { code: "CT", label: "Cuti Tahunan", time: "Libur / Cuti (Off)", color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700" },
+        { code: "CP / CH", label: "Cuti Panjang / Hamil", time: "Libur / Cuti (Off)", color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-700" },
+        { code: "LU / K / IR", label: "Libur Nasional / Ijin", time: "Hari Libur (Off)", color: "bg-slate-100 text-slate-600 dark:bg-slate-800/40 dark:text-slate-400 border border-slate-200 dark:border-slate-700" },
     ];
 
     return (
