@@ -33,7 +33,9 @@ export default function ScheduleUploadPage() {
             if (res.ok) {
                 toast.success(data.message || "Jadwal berhasil diupdate");
                 setFile(null);
-                window.location.reload();
+                setTimeout(() => {
+                    window.location.href = "/dashboard/settings/schedule/view";
+                }, 800);
             } else {
                 toast.error(data.error || "Gagal mengunggah jadwal");
             }

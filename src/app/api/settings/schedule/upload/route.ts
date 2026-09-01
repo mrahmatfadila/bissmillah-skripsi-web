@@ -147,19 +147,23 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
-        // Upsert each schedule entry
+        // Clean up previous schedules for this specific target month to avoid orphan/shifted shifts
+        const startOfMonthDate = new Date(Date.UTC(targetYear, targetMonth, 1));
+        const endOfMonthDate = new Date(Date.UTC(targetYear, targetMonth + 1, 0, 23, 59, 59, 999));
+
+        await prisma.shiftSchedule.deleteMany({
+            where: {
+                date: {
+                    gte: startOfMonthDate,
+                    lte: endOfMonthDate,
+                }
+            }
+        });
+
+        // Insert fresh schedules for the month
         for (const s of schedules) {
-            await prisma.shiftSchedule.upsert({
-                where: {
-                    date_shift: {
-                        date: s.date,
-                        shift: s.shift
-                    }
-                },
-                update: {
-                    agentName: s.agentName,
-                },
-                create: {
+            await prisma.shiftSchedule.create({
+                data: {
                     date: s.date,
                     shift: s.shift,
                     agentName: s.agentName,
@@ -167,9 +171,12 @@ export async function POST(req: Request) {
             });
         }
 
+        const monthNameFound = Object.keys(monthMap).find(k => monthMap[k] === targetMonth) || '';
         return NextResponse.json({
-            message: `Jadwal ${Object.keys(monthMap).find(k => monthMap[k] === targetMonth) || ''} ${targetYear} berhasil diimpor! Total entri: ${schedules.length}`,
+            message: `Jadwal ${monthNameFound} ${targetYear} berhasil diperbarui! Total ${schedules.length} shift terpasang untuk ${employeeSchedules.length} staf.`,
             importedRows: schedules.length,
+            targetMonth: targetMonth + 1,
+            targetYear,
         });
 
     } catch (error: any) {
