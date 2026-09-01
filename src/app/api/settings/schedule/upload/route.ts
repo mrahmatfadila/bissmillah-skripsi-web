@@ -59,10 +59,18 @@ export async function POST(req: Request) {
             }
         }
 
-        const schedules: any[] = [];
+        // List of all valid shift and leave tokens
+        const VALID_SHIFT_TOKEN = /^(P|S|M|L|LU|CT|CP|CH|CTB|K|IR|BT|OFF|-)$/i;
+
+        const employeeSchedules: {
+            nik: string;
+            agentName: string;
+            shifts: string[];
+        }[] = [];
 
         for (let i = 0; i < nikMatches.length; i++) {
             const nikMatch = nikMatches[i];
+            const nik = nikMatch[1];
             const startIdx = nikMatch.index + nikMatch[0].length;
             const endIdx = i + 1 < nikMatches.length ? nikMatches[i + 1].index : rawText.length;
             const segment = rawText.substring(startIdx, endIdx).replace(/\|/g, ' ').trim();
@@ -73,8 +81,9 @@ export async function POST(req: Request) {
             const shiftTokens: string[] = [];
 
             for (const token of tokens) {
-                if (/^[PSML]$/.test(token.toUpperCase()) && shiftTokens.length < 31) {
-                    shiftTokens.push(token.toUpperCase());
+                const upper = token.toUpperCase();
+                if (VALID_SHIFT_TOKEN.test(upper) && shiftTokens.length < 31) {
+                    shiftTokens.push(upper);
                 } else if (shiftTokens.length === 0 && !/^\d+$/.test(token)) {
                     nameTokens.push(token);
                 } else if (shiftTokens.length > 0 && /^\d+$/.test(token)) {
@@ -85,19 +94,47 @@ export async function POST(req: Request) {
             const agentName = nameTokens.join(" ").replace(/\|/g, '').trim();
             if (!agentName || shiftTokens.length === 0) continue;
 
-            for (let day = 0; day < shiftTokens.length; day++) {
-                const code = shiftTokens[day];
+            employeeSchedules.push({
+                nik,
+                agentName,
+                shifts: shiftTokens,
+            });
+        }
+
+        // Check if month has 29-31 days but only 28 days were parsed (due to PDF column page-break)
+        const daysInTargetMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+        if (daysInTargetMonth > 28 && employeeSchedules.every(e => e.shifts.length <= 28)) {
+            // Find overflow days (e.g. on page 5)
+            // Look for pattern "29 30 31" or "29 30" followed by shift tokens
+            const overflowMatch = rawText.match(/29\s+30(?:\s+31)?[\s\S]*?(?=(?:Keterangan|Total|$))/i);
+            if (overflowMatch) {
+                const overflowTokens = overflowMatch[0].split(/\s+/).filter(t => VALID_SHIFT_TOKEN.test(t.toUpperCase()));
+                const extraDaysCount = daysInTargetMonth - 28;
+                if (overflowTokens.length >= employeeSchedules.length * extraDaysCount) {
+                    for (let idx = 0; idx < employeeSchedules.length; idx++) {
+                        const start = idx * extraDaysCount;
+                        const extraShifts = overflowTokens.slice(start, start + extraDaysCount).map(t => t.toUpperCase());
+                        employeeSchedules[idx].shifts.push(...extraShifts);
+                    }
+                }
+            }
+        }
+
+        const schedules: any[] = [];
+        for (const emp of employeeSchedules) {
+            for (let day = 0; day < emp.shifts.length; day++) {
+                const code = emp.shifts[day];
                 let shiftName = "";
                 if (code === "P") shiftName = "PAGI";
                 else if (code === "S") shiftName = "SIANG";
                 else if (code === "M") shiftName = "MALAM";
-                // L = Libur, skip
+                // L, CT, CP, LU, etc. are off/leave days
 
                 if (shiftName) {
                     schedules.push({
                         date: new Date(Date.UTC(targetYear, targetMonth, day + 1)),
                         shift: shiftName,
-                        agentName: agentName,
+                        agentName: emp.agentName,
                     });
                 }
             }

@@ -271,7 +271,7 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
                                 <Label className="text-slate-700 dark:text-slate-300 font-semibold">Lampiran Bukti (Opsional)</Label>
                                 <span className="text-xs text-muted-foreground">Maks {settings?.ticket?.maxAttachmentSize || 5}MB</span>
                             </div>
-                            
+
                             <div className="relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 bg-slate-50/50 dark:bg-slate-900/20 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:border-blue-400 transition-all duration-200 text-center flex flex-col items-center justify-center group overflow-hidden">
                                 <input
                                     type="file"
@@ -282,7 +282,7 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                     title="Klik untuk memilih file"
                                 />
-                                
+
                                 <div className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-slate-200 dark:border-slate-700 mb-3 group-hover:scale-110 transition-transform">
                                     {uploading ? (
                                         <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
@@ -334,18 +334,17 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
                                     <div>
                                         <h4 className="font-bold text-slate-800 dark:text-slate-100 text-base flex items-center gap-2">
                                             Penilaian Dampak & Urgensi
-                                            <span className="text-[10px] bg-blue-100/50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800 font-bold uppercase tracking-wider">AI Priority</span>
                                         </h4>
                                         <p className="text-xs text-muted-foreground mt-0.5">Sistem akan secara otomatis menentukan tingkat prioritas berdasarkan kuesioner ini.</p>
                                     </div>
                                 </div>
-                                
+
                                 {/* Live Result Preview */}
                                 {(() => {
                                     let totalScore = 0;
                                     let maxScore = 0;
                                     let validWeight = 0;
-                                    
+
                                     ahpCriteria.forEach(c => {
                                         const score = ahpScores[c.name] || 1;
                                         totalScore += c.weight * score;
@@ -361,7 +360,7 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
                                     if (totalScore >= 3.8) expectedPriority = 'CRITICAL';
                                     else if (totalScore >= 2.8) expectedPriority = 'HIGH';
                                     else if (totalScore >= 1.5) expectedPriority = 'MEDIUM';
-                                    
+
                                     if (maxScore >= 5 && (expectedPriority === 'LOW' || expectedPriority === 'MEDIUM')) expectedPriority = 'HIGH';
                                     else if (maxScore >= 4 && expectedPriority === 'LOW') expectedPriority = 'MEDIUM';
 
@@ -420,7 +419,7 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
                         )}
                     </div>
                 </div>
-                
+
                 <DialogFooter className="shrink-0 p-4 px-6 border-t border-border/50 bg-slate-50/50 dark:bg-slate-900/50 sm:justify-between items-center">
                     <p className="text-xs text-muted-foreground hidden sm:block">Harap pastikan semua detail sudah benar.</p>
                     <div className="flex gap-3 w-full sm:w-auto">
@@ -428,8 +427,8 @@ export function CreateTicketDialog({ open, onOpenChange, onSuccess, defaultCateg
                             Batalkan
                         </Button>
                         <Button className="flex-1 sm:flex-none h-11 rounded-xl px-8 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md shadow-blue-500/20 transition-all" onClick={handleSubmit} disabled={submitting}>
-                            {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : 
-                            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>}
+                            {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> :
+                                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>}
                             Kirim Tiket
                         </Button>
                     </div>
