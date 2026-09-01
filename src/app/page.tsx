@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Loader2, Lock, User, ArrowRight, Shield, CheckCircle2 } from "lucide-react";
@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [nik, setNik] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,27 @@ export default function LoginPage() {
     router.prefetch('/dashboard');
     router.prefetch('/tickets/mine');
     router.prefetch('/tickets/assigned');
-  }, [router]);
+
+    if (status === "authenticated" && session?.user) {
+      const role = (session.user as any)?.role;
+      const rolesWithDashboard = [
+        'SUPER_ADMIN',
+        'IT_SUPPORT',
+        'ASSISTANT_MANAGER_IT',
+        'IT_DATA_ADMIN',
+        'MANAGER_SHOP',
+        'MANAGER_SAM',
+        'ASSISTANT_MANAGER_SAM'
+      ];
+      if (role === 'DEVELOPER') {
+        window.location.href = '/dev/logs';
+      } else if (role && rolesWithDashboard.includes(role)) {
+        window.location.href = '/dashboard';
+      } else {
+        window.location.href = '/tickets/mine';
+      }
+    }
+  }, [router, status, session]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,29 +67,38 @@ export default function LoginPage() {
         }
         setLoading(false);
       } else {
-        // Fetch session to get user role
-        const response = await fetch('/api/auth/session');
-        const session = await response.json();
-        const role = session?.user?.role;
+        // Fetch session to determine role-based redirect
+        let targetUrl = '/dashboard';
+        try {
+          const response = await fetch('/api/auth/session');
+          if (response.ok) {
+            const session = await response.json();
+            const role = session?.user?.role;
 
-        // Role-based redirect
-        const rolesWithDashboard = [
-          'SUPER_ADMIN',
-          'IT_SUPPORT',
-          'ASSISTANT_MANAGER_IT',
-          'IT_DATA_ADMIN',
-          'MANAGER_SHOP',
-          'MANAGER_SAM',
-          'ASSISTANT_MANAGER_SAM' // Added mainly for reference, strictly these go to dashboard
-        ];
+            const rolesWithDashboard = [
+              'SUPER_ADMIN',
+              'IT_SUPPORT',
+              'ASSISTANT_MANAGER_IT',
+              'IT_DATA_ADMIN',
+              'MANAGER_SHOP',
+              'MANAGER_SAM',
+              'ASSISTANT_MANAGER_SAM'
+            ];
 
-        if (role === 'DEVELOPER') {
-          router.push('/dev/logs');
-        } else if (rolesWithDashboard.includes(role)) {
-          router.push('/dashboard');
-        } else {
-          router.push('/tickets/mine');
+            if (role === 'DEVELOPER') {
+              targetUrl = '/dev/logs';
+            } else if (role && rolesWithDashboard.includes(role)) {
+              targetUrl = '/dashboard';
+            } else if (role) {
+              targetUrl = '/tickets/mine';
+            }
+          }
+        } catch (e) {
+          console.error("Session lookup fallback", e);
         }
+
+        // Use window.location.href to guarantee fresh session cookie delivery to Server Components
+        window.location.href = targetUrl;
       }
     } catch (err) {
       setError("Terjadi kesalahan pada sistem");
