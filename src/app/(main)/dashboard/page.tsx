@@ -20,7 +20,16 @@ export default async function DashboardPage() {
     const session = await getServerSession(authOptions);
     const role = session?.user?.role;
 
-    const allowedRoles = ['SUPER_ADMIN', 'IT_SUPPORT', 'MANAGER'];
+    const allowedRoles = [
+        'SUPER_ADMIN',
+        'IT_SUPPORT',
+        'MANAGER',
+        'ASSISTANT_MANAGER_IT',
+        'IT_DATA_ADMIN',
+        'MANAGER_SHOP',
+        'MANAGER_SAM',
+        'ASSISTANT_MANAGER_SAM'
+    ];
     if (!role || !allowedRoles.includes(role)) {
         redirect('/tickets/mine');
     }

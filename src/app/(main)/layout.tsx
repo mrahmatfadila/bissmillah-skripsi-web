@@ -7,6 +7,8 @@ import { MaintenanceBlock } from "@/components/maintenance-block";
 import { Footer } from "@/components/layout/footer";
 import { LiveShiftBanner } from "@/components/live-shift-banner";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardLayout({
     children,
 }: {
