@@ -316,7 +316,13 @@ export function DashboardHeader() {
                             <Link href="/dashboard/preferences" prefetch={true} className="cursor-pointer w-full">Settings</Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={() => signOut({ callbackUrl: "/" })}>
+                        <DropdownMenuItem
+                            className="text-red-600 cursor-pointer"
+                            onClick={async () => {
+                                await signOut({ redirect: false });
+                                window.location.href = "/";
+                            }}
+                        >
                             Log out
                         </DropdownMenuItem>
                     </DropdownMenuContent>

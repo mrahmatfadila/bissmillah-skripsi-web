@@ -305,7 +305,10 @@ export function Sidebar() {
                     )}
                 </div>
                 <Button
-                    onClick={() => signOut({ callbackUrl: "/" })}
+                    onClick={async () => {
+                        await signOut({ redirect: false });
+                        window.location.href = "/";
+                    }}
                     variant="ghost"
                     className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-destructive/10"
                 >
