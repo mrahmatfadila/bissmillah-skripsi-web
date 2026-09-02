@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modal Buat Tiket Permintaan - Skripsi Asset</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f1f5f9;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .slider-track {
+      position: relative;
+      width: 100%;
+      height: 6px;
+      background-color: #e2e8f0;
+      border-radius: 9999px;
+    }
+    .slider-fill {
+      position: absolute;
+      height: 100%;
+      background-color: #2563eb;
+      border-radius: 9999px;
+    }
+    .slider-thumb {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 18px;
+      height: 18px;
+      background-color: #2563eb;
+      border: 3px solid #ffffff;
+      border-radius: 9999px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
+  </style>
+</head>
+<body class="p-8 flex items-center justify-center min-h-screen">
+
+  <!-- Modal Container -->
+  <div id="modal-container" class="w-[660px] bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden flex flex-col">
+    
+    <!-- Modal Header -->
+    <div class="p-6 pb-4 border-b border-slate-100 bg-slate-50/80 relative">
+      <!-- Close Button -->
+      <button class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 bg-blue-100 text-blue-600 rounded-xl">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">Buat Tiket Permintaan</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Jelaskan masalah Anda selengkap mungkin agar tim IT dapat mendiagnosis dengan cepat.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6 space-y-5 bg-white">
+      
+      <!-- Judul Masalah -->
+      <div class="space-y-1.5">
+        <label class="block text-sm font-semibold text-slate-700">
+          Judul Masalah <span class="text-red-500">*</span>
+        </label>
+        <div class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm font-medium shadow-sm">
+          Barcode Scanner Kasir Mati Total
+        </div>
+      </div>
+
+      <!-- Kategori Departemen -->
+      <div class="space-y-1.5">
+        <label class="block text-sm font-semibold text-slate-700">
+          Kategori Departemen <span class="text-red-500">*</span>
+        </label>
+        <div class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm font-medium flex items-center justify-between shadow-sm">
+          <span>IT Support</span>
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Deskripsi Detail -->
+      <div class="space-y-1.5">
+        <label class="block text-sm font-semibold text-slate-700">
+          Deskripsi Detail <span class="text-red-500">*</span>
+        </label>
+        <div class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 text-sm leading-relaxed min-h-[110px] shadow-sm">
+          Minta tolong di cek barcode scanner di POS 1 DFD02 Terminal 3 mati total, lampu indikatornya tidak menyala sama sekali, Sudah dicoba pindah port USB tetap tidak terdeteksi. Tolong dibantu, Kasir jadi harus input manual...
+        </div>
+      </div>
+
+      <!-- Lampiran Bukti -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center text-sm">
+          <label class="font-semibold text-slate-700">Lampiran Bukti (Opsional)</label>
+          <span class="text-xs text-slate-400">Maks 5MB</span>
+        </div>
+        <div class="border-2 border-dashed border-slate-200 rounded-xl p-6 bg-slate-50/50 flex flex-col items-center justify-center text-center">
+          <div class="p-3 bg-white rounded-full shadow-sm border border-slate-200 mb-2">
+            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+          </div>
+          <span class="text-sm font-semibold text-slate-700">Klik atau Seret file ke sini</span>
+          <span class="text-xs text-slate-400 mt-1">Format yang didukung: JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, XLSX</span>
+        </div>
+      </div>
+
+      <!-- Section Penilaian Dampak & Urgensi -->
+      <div class="pt-4 border-t border-slate-200 space-y-4">
+        <div>
+          <h3 class="font-bold text-slate-800 text-base">Penilaian Dampak & Urgensi</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Sistem akan secara otomatis menentukan tingkat prioritas berdasarkan kuesioner ini.</p>
+        </div>
+
+        <!-- Result Banner -->
+        <div class="p-4 rounded-xl border-l-[6px] border-amber-400 bg-amber-50/90 border border-amber-200 flex items-center justify-between shadow-sm">
+          <div class="flex flex-col">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-amber-700 opacity-80 mb-0.5">PREDIKSI PRIORITAS</span>
+            <span class="text-sm font-black tracking-wide text-amber-800">HIGH</span>
+          </div>
+          <div class="flex flex-col items-end">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-amber-700 opacity-80 mb-0.5">SKOR KALKULASI</span>
+            <span class="text-lg font-black text-amber-800">3.20 / 5.00</span>
+          </div>
+        </div>
+
+        <!-- Criteria Grid -->
+        <div class="grid grid-cols-2 gap-3.5 pt-1">
+          
+          <!-- Card 1: Cakupan -->
+          <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+            <div class="flex justify-between items-start gap-2">
+              <div>
+                <h4 class="text-xs font-bold text-slate-800">Cakupan</h4>
+                <p class="text-[10.5px] text-slate-500 leading-snug mt-0.5">Berapa banyak pengguna atau perangkat yang berdampak? Nilai tinggi jika seluruh toko, departemen, atau banyak karyawan ikut terganggu.</p>
+              </div>
+              <span class="bg-white text-blue-600 px-2 py-0.5 rounded-md shadow-xs border border-slate-200 text-xs font-bold shrink-0">Nilai: 2</span>
+            </div>
+            <div class="pt-1">
+              <div class="slider-track">
+                <div class="slider-fill" style="width: 25%;"></div>
+                <div class="slider-thumb" style="left: 25%;"></div>
+              </div>
+              <div class="flex justify-between text-[9.5px] text-slate-400 font-semibold mt-2">
+                <span>Sangat Rendah</span>
+                <span>Sangat Tinggi</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Dampak -->
+          <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+            <div class="flex justify-between items-start gap-2">
+              <div>
+                <h4 class="text-xs font-bold text-slate-800">Dampak</h4>
+                <p class="text-[10.5px] text-slate-500 leading-snug mt-0.5">Seberapa besar efek masalah terhadap operasional toko/kantor? Nilai tinggi jika transaksi, pelayanan, atau sistem utama terganggu.</p>
+              </div>
+              <span class="bg-white text-blue-600 px-2 py-0.5 rounded-md shadow-xs border border-slate-200 text-xs font-bold shrink-0">Nilai: 4</span>
+            </div>
+            <div class="pt-1">
+              <div class="slider-track">
+                <div class="slider-fill" style="width: 75%;"></div>
+                <div class="slider-thumb" style="left: 75%;"></div>
+              </div>
+              <div class="flex justify-between text-[9.5px] text-slate-400 font-semibold mt-2">
+                <span>Sangat Rendah</span>
+                <span>Sangat Tinggi</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Kompleksitas -->
+          <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+            <div class="flex justify-between items-start gap-2">
+              <div>
+                <h4 class="text-xs font-bold text-slate-800">Kompleksitas</h4>
+                <p class="text-[10.5px] text-slate-500 leading-snug mt-0.5">Seberapa rumit masalah ini untuk diselesaikan? Nilai tinggi jika memerlukan keahlian teknis khusus atau waktu penyelesaian lama.</p>
+              </div>
+              <span class="bg-white text-blue-600 px-2 py-0.5 rounded-md shadow-xs border border-slate-200 text-xs font-bold shrink-0">Nilai: 2</span>
+            </div>
+            <div class="pt-1">
+              <div class="slider-track">
+                <div class="slider-fill" style="width: 25%;"></div>
+                <div class="slider-thumb" style="left: 25%;"></div>
+              </div>
+              <div class="flex justify-between text-[9.5px] text-slate-400 font-semibold mt-2">
+                <span>Sangat Rendah</span>
+                <span>Sangat Tinggi</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Risiko -->
+          <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+            <div class="flex justify-between items-start gap-2">
+              <div>
+                <h4 class="text-xs font-bold text-slate-800">Risiko</h4>
+                <p class="text-[10.5px] text-slate-500 leading-snug mt-0.5">Seberapa besar potensi kerugian jika masalah tidak segera ditangani? Nilai tinggi jika menyangkut keamanan data, kerugian finansial, atau gangguan berkepanjangan.</p>
+              </div>
+              <span class="bg-white text-blue-600 px-2 py-0.5 rounded-md shadow-xs border border-slate-200 text-xs font-bold shrink-0">Nilai: 4</span>
+            </div>
+            <div class="pt-1">
+              <div class="slider-track">
+                <div class="slider-fill" style="width: 75%;"></div>
+                <div class="slider-thumb" style="left: 75%;"></div>
+              </div>
+              <div class="flex justify-between text-[9.5px] text-slate-400 font-semibold mt-2">
+                <span>Sangat Rendah</span>
+                <span>Sangat Tinggi</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5: Urgensi (Span 1 or Centered) -->
+          <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+            <div class="flex justify-between items-start gap-2">
+              <div>
+                <h4 class="text-xs font-bold text-slate-800">Urgensi</h4>
+                <p class="text-[10.5px] text-slate-500 leading-snug mt-0.5">Seberapa mendesak masalah ini? Nilai tinggi jika pekerjaan terhenti total dan membutuhkan penanganan segera.</p>
+              </div>
+              <span class="bg-white text-blue-600 px-2 py-0.5 rounded-md shadow-xs border border-slate-200 text-xs font-bold shrink-0">Nilai: 3</span>
+            </div>
+            <div class="pt-1">
+              <div class="slider-track">
+                <div class="slider-fill" style="width: 50%;"></div>
+                <div class="slider-thumb" style="left: 50%;"></div>
+              </div>
+              <div class="flex justify-between text-[9.5px] text-slate-400 font-semibold mt-2">
+                <span>Sangat Rendah</span>
+                <span>Sangat Tinggi</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="p-4 px-6 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
+      <p class="text-xs text-slate-400 font-medium">Harap pastikan semua detail sudah benar.</p>
+      <div class="flex items-center gap-3">
+        <button class="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors shadow-sm">
+          Batalkan
+        </button>
+        <button class="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-md shadow-blue-500/20">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
+          Kirim Tiket
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
