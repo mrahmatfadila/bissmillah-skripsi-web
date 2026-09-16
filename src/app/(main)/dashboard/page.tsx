@@ -57,10 +57,16 @@ export default async function DashboardPage() {
         // 1. Basic Counts
         prisma.ticket.count(),
         prisma.ticket.count({
-            where: { assigneeId: session.user.id }
+            where: {
+                assigneeId: session.user.id,
+                status: { in: ['OPEN', 'IN_PROGRESS', 'PENDING'] }
+            }
         }),
         prisma.ticket.count({
-            where: { assigneeId: session.user.id, status: 'RESOLVED' }
+            where: {
+                assigneeId: session.user.id,
+                status: { in: ['RESOLVED', 'CLOSED'] }
+            }
         }),
         // 2. Recent Tickets
         prisma.ticket.findMany({
@@ -179,6 +185,11 @@ export default async function DashboardPage() {
             image: detail?.image || null,
             count: item._count.assigneeId
         };
+    }).sort((a, b) => {
+        if (b.count !== a.count) return b.count - a.count;
+        if (a.name?.includes('Herman')) return -1;
+        if (b.name?.includes('Herman')) return 1;
+        return 0;
     });
 
     const deptMap: Record<string, number> = {};

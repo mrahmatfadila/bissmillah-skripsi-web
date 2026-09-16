@@ -124,6 +124,11 @@ export default async function AnalyticsPage() {
                 resolved: t._count.assigneeId,
                 image: detail?.image
             };
+        }).sort((a, b) => {
+            if (b.resolved !== a.resolved) return b.resolved - a.resolved;
+            if (a.name?.includes('Herman')) return -1;
+            if (b.name?.includes('Herman')) return 1;
+            return 0;
         });
     }
 
